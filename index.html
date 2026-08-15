@@ -6821,7 +6821,16 @@ function playerAvatarSVG(avatarSeed,pos="PG",age=16,label="球員頭像"){
    <rect width="100" height="100" fill="url(#${uid}light)"/>
  </svg>`;
 }
-function renderPlayerAvatar(el,avatarSeed,pos,age,label,playerName=""){if(el)el.innerHTML=playerAvatarSVG(avatarSeed,pos,age,label,playerName)}
+function renderPlayerAvatar(el,avatarSeed,pos,age,label,playerName=""){
+ if(!el)return;
+ const customImage=customPlayerAvatarImage(playerName);
+ if(customImage){
+  const safeLabel=String(label||"球員頭像").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  el.innerHTML=`<span class="avatarComposite" role="img" aria-label="${safeLabel}"><img class="avatarCustomImage" src="${customImage}" alt=""></span>`;
+  return;
+ }
+ el.innerHTML=playerAvatarSVG(avatarSeed,pos,age,label,playerName);
+}
 function drawPlayerAvatarCanvas(c,x,y,size,avatarSeed,pos="PG",age=16){
  const a=avatarProfile(avatarSeed,pos),older=Number(age)>=34;if(Number(age)>=38)a.hair="#5b5754";
  c.save();c.translate(x,y);c.scale(size/100,size/100);c.beginPath();c.rect(0,0,100,100);c.clip();
