@@ -6,6 +6,8 @@
 
 **目前正式版：V7.50.10**｜**更新日期：2026-08-15**
 
+> 此分支為陳偉振專屬離線版：只使用瀏覽器本機存檔，不連接 Supabase、排行榜或 BL LIVE。
+
 > README 保留目前玩法、最新版本重點與近期版本精華；細碎修正不再逐版重複堆疊。
 
 ## 📝 版本更新紀錄
@@ -219,7 +221,9 @@ BL POWER 是退休時的生涯歷史評價，會綜合巔峰 OVR、聯盟強度�
 
 目前顯示尺度為早期數值的 10 倍，方便閱讀與比較；各項權重、相對差距及排行榜先後順序不變。
 
-## 🌐 Online、公開生涯與排行榜
+## 🌐 原版 Online、公開生涯與排行榜
+
+本專屬分支已停用以下 Online、公開生涯、排行榜與 BL LIVE 功能；本節僅保留原版 V7.50.10 的功能說明作為出處與版本對照。
 
 **BL LIVE** 只會把 NBA 正式突破、頂級職業聯盟冠軍、MVP／FMVP／DPOY、成人國家隊爭冠成績、NCAA D1 全國冠軍、名人堂、球衣退休與傳奇級退休送上全服跑馬燈。天才覺醒、數據王、年度陣容、明星賽、一般冠軍、一般退休、簽約、旅外、交易、一般稱號、日常事件與傷病都不再占用跑馬燈。
 
@@ -250,3 +254,9 @@ BL POWER 是退休時的生涯歷史評價，會綜合巔峰 OVR、聯盟強度�
 > 從 HBL 的無名高中生開始，看看最後能不能讓自己的名字留在 BasketballLife 的歷史裡。
 
 Produced by [BasketballLife_K](https://www.threads.com/@basketballlife_k?xmt=AQG0tS6gtXrN8CWiBiJqphKuoz5VwtJFONP4svLNEbhjdt0)
+
+## 📌 出處與原始碼
+
+這是由陳偉振自行修改的專屬版本，僅供陳偉振遊玩；遊戲內容與數值可能已不同於原版。
+
+想體驗原版 BasketballLife，請前往[官方網站](https://akai0013.github.io/basketballlife/)；原版專案來源為 [GitHub：AKai0013/basketballlife](https://github.com/AKai0013/basketballlife)。

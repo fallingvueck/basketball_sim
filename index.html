@@ -4468,12 +4468,12 @@ body.retirementMode .header .who{gap:6px}
       <button type="button" onclick="quickRestartCareer('same')"><b>↻ 同 Seed 重玩</b><small>保留姓名、位置、身材與出生地；外觀重新產生</small></button>
       <button type="button" onclick="quickRestartCareer('random')"><b>🎲 重新抽 Seed</b><small>保留球員設定，只更換新的世界</small></button>
     </div>
-    <button id="leaderboardBtn" class="topRankBtn" type="button" onclick="BasketballLifeOnline.openLeaderboard()">🏆 排行榜</button>
+    <button id="leaderboardBtn" class="topRankBtn hidden" type="button" onclick="BasketballLifeOnline.openLeaderboard()">🏆 排行榜</button>
     <a class="versionLink" href="https://github.com/AKai0013/basketballlife/blob/main/README.md#-版本更新紀錄" target="_blank" rel="noopener noreferrer" aria-label="查看 V7.50.10 版本更新紀錄"><b>V7.50.10</b><span>更新紀錄</span></a>
     <div id="onlineStatus" class="onlineStatus connecting"><span class="onlineDot"></span><span id="onlineStatusText">連線中…</span></div>
   </div>
 </div>
-<div id="liveTicker" class="liveTicker"><div class="liveLabel">BL LIVE</div><div class="liveViewport"><div id="liveTrack" class="liveTrack">新的籃球人生即將開始。</div></div></div>
+<div id="liveTicker" class="liveTicker hidden"><div class="liveLabel">BL LIVE</div><div class="liveViewport"><div id="liveTrack" class="liveTrack">離線單機模式。</div></div></div>
 
 <section id="setup" class="card setup">
 <div id="siteMigrationPanel" class="siteMigrationPanel hidden" aria-live="polite">
@@ -4488,6 +4488,7 @@ body.retirementMode .header .who{gap:6px}
 </div>
 <div class="setupIdentity"><div class="setupLogoFrame"><img class="setupLogo" src="./basketballlife-logo.png" alt="BasketballLife 遊戲徽章" onerror="this.remove()"></div><div><div class="setupKicker">BASKETBALL CAREER SIMULATOR</div><h1>你的籃球人生，從 HBL 開始。</h1><p class="mut">16 歲踏進高中球場，走過升學、職業、旅外、國家隊，直到最後一次離開球員通道。Seed 決定天賦與體質；每一次選擇，決定你能把名字帶到多遠。</p><div class="setupPromise"><span>16 歲・高一</span><span>完整生涯模擬</span><span>多聯盟路線</span></div></div></div>
 <label for="playerNameInput">為球員取名</label><input id="playerNameInput" placeholder="例如：林子翔" maxlength="12" autocomplete="off">
+<label for="jerseyNumberInput">選擇球衣號碼</label><input id="jerseyNumberInput" type="number" min="0" max="99" placeholder="例如：7 或 17" autocomplete="off">
 <label>選擇場上位置</label><div id="posgrid" class="posgrid"></div>
 <div class="setupBuilder">
   <div class="setupSection">
@@ -4571,12 +4572,12 @@ body.retirementMode .header .who{gap:6px}
 </section>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /*
  * BasketballLife Online hook
  * ------------------------------------------------------------
- * 單機版保持 disabled。
+ * 陳偉振專屬版固定為單機模式：不載入 Supabase、不可上傳生涯，
+ * 也不接收或發布 BL LIVE。
  * 接上 Supabase 後，online.js 會提供：
  *   window.BasketballLifeOnline.publishNews(item)
  * 並透過：
@@ -4585,9 +4586,7 @@ body.retirementMode .header .who{gap:6px}
  * 把其他玩家的重大消息送進跑馬條。
  */
 window.BL_ONLINE_CONFIG = {
-  enabled:true,
-  supabaseUrl:"https://qqzdrcfxypdnfisroamm.supabase.co",
-  publishableKey:"sb_publishable_DVxBcp9oPaCkd9d5KrJmHA_Py2Ii_ar"
+  enabled:false
 };
 
 
@@ -6283,6 +6282,10 @@ const POSITION_BODY_RANGES={
  C:{height:[201,224],defaultHeight:211,reach:[5,29],defaultReach:18}
 };
 let chosenPos="PG",chosenHeight=188,chosenWingspan=198,chosenBirthplace="RANDOM",p=null,selectedDie=null;
+const BLESSED_PLAYER_NAME="陳偉振";
+const MAX_TALENT_PLAYER_NAME="陳威震";
+function isBlessedPlayer(name){return String(name||"").trim()===BLESSED_PLAYER_NAME}
+function isMaxTalentPlayer(name){return String(name||"").trim()===MAX_TALENT_PLAYER_NAME}
 
 function bodyRangeFor(pos=chosenPos){return POSITION_BODY_RANGES[pos]||POSITION_BODY_RANGES.PG}
 function clampNumber(value,min,max){return Math.max(min,Math.min(max,Number(value)||min))}
@@ -7252,7 +7255,19 @@ function startCareer(){
  if(previousSave&&!window.confirm("開始新人生會覆蓋目前的本機生涯存檔，確定要繼續嗎？"))return;
  if(previousSave)clearCareerSave(false);
  const n=document.getElementById("playerNameInput").value.trim()||"無名球員",r=RNG(seed+chosenPos);
- const tier=seedTierProfile(seed);
+ const jerseyNumberInput=document.getElementById("jerseyNumberInput");
+ const jerseyNumber=jerseyNumberInput&&jerseyNumberInput.value!==""?Math.max(0,Math.min(99,Math.round(Number(jerseyNumberInput.value)))):0;
+ const blessed=isBlessedPlayer(n),maxTalent=isMaxTalentPlayer(n);
+ if(blessed||maxTalent){
+   const message=blessed
+     ?"陳偉振專屬彩蛋已啟用！\\n最高初始能力與先天核心數值已套用。"
+     :"陳威震專屬彩蛋已啟用！\\n繼承陳偉振規則，並取得所選位置的最高身高與最長臂展。";
+   window.alert(`🎁 發現隱藏彩蛋！\\n\\n${message}`);
+ }
+ const bodyRange=bodyRangeFor(chosenPos);
+ const playerHeight=maxTalent?bodyRange.height[1]:chosenHeight;
+ const playerWingspan=maxTalent?playerHeight+bodyRange.reach[1]:chosenWingspan;
+ const tier=(blessed||maxTalent)?SEED_TIER_DEFS[0]:seedTierProfile(seed);
  const tb=()=>ri(r,tier.start[0],tier.start[1]);
 
  let s={
@@ -7264,18 +7279,20 @@ function startCareer(){
  if(chosenPos==="SF"){s.finish+=5;s.defense+=4}
  if(chosenPos==="PF"){s.rebound+=7;s.defense+=4}
  if(chosenPos==="C"){s.rebound+=10;s.defense+=7}
- const bodyMods=bodyAttributeModifiers(chosenPos,chosenHeight,chosenWingspan);
+ const bodyMods=bodyAttributeModifiers(chosenPos,playerHeight,playerWingspan);
  Object.entries(bodyMods).forEach(([k,v])=>{s[k]+=v});
  Object.keys(s).forEach(k=>s[k]=Math.max(22,Math.min(58,s[k])));
+ if(blessed||maxTalent)Object.keys(s).forEach(k=>s[k]=58);
 
  let caps={};
  for(let k in s)caps[k]=Math.min(99,s[k]+ri(r,tier.cap[0],tier.cap[1]));
+ if(blessed||maxTalent)Object.keys(caps).forEach(k=>caps[k]=99);
 
  const birthplaceChoice=document.getElementById("birthplaceInput")?.value||chosenBirthplace;
  const birthplace=birthplaceChoice==="RANDOM"?TAIWAN_BIRTHPLACES[ri(RNG(`${seed}-birthplace`),0,TAIWAN_BIRTHPLACES.length-1)]:birthplaceChoice;
- p={name:n,pos:chosenPos,seed,avatarSeed:newAvatarSeed(),heightCm:chosenHeight,wingspanCm:chosenWingspan,birthplace,careerVersion:"7.50.10",seedTier:tier.key,seedTierLabel:tier.label,seedTierDesc:tier.desc,
- age:16,year:2026,path:"HBL",grade:1,stage:"training",stats:s,caps,growth:ri(r,tier.growth[0],tier.growth[1]),
- durability:ri(r,38,94),clutch:ri(r,35,96),discipline:ri(r,38,94),confidence:50,health:100,fatigue:0,six:0,genius:false,geniusType:"",round:0,eventIndex:0,
+ p={name:n,pos:chosenPos,seed,avatarSeed:newAvatarSeed(),heightCm:playerHeight,wingspanCm:playerWingspan,birthplace,careerVersion:"7.50.10",seedTier:tier.key,seedTierLabel:tier.label,seedTierDesc:tier.desc,
+ age:16,year:2026,path:"HBL",grade:1,stage:"training",stats:s,caps,growth:(blessed||maxTalent)?99:ri(r,tier.growth[0],tier.growth[1]),jerseyNumber,
+ durability:(blessed||maxTalent)?99:ri(r,38,94),clutch:(blessed||maxTalent)?99:ri(r,35,96),discipline:(blessed||maxTalent)?99:ri(r,38,94),luck:(blessed||maxTalent)?100:0,confidence:(blessed||maxTalent)?100:50,health:100,fatigue:0,six:0,genius:false,geniusType:"",round:0,eventIndex:0,
  seasonEventCount:ri(r,2,4),dice:[],used:[],trainingUndo:[],trainingProgress:{shoot:0,finish:0,handle:0,pass:0,defense:0,rebound:0,ath:0,iq:0},pointUndo:[],seasonPoints:0,bonusPoints:0,rep:0,injury:null,injuryHistory:[],log:[],seasonStats:null,team:"",geniusResolved:false,geniusFailed:false,transition:null,geniusCostDiscount:0,titles:[],titleHistory:[],seasonPointFocus:[],clutchWins:0,eventSuccesses:0,healthySeasons:0,championships:0,severeInjuryRecovered:false,offers:[],strategyStats:{risk:{pick:0,success:0,streak:0,best:0},balance:{pick:0,success:0,streak:0,best:0},safe:{pick:0,success:0,streak:0,best:0}},seasonEventSuccess:0,geniusFailureShown:false,careerSeason:0,contract:null,seasonPlan:null,planRiskMod:0,planGrowthMod:0,planStatMod:0,nationalCaps:0,relationship:"單身",lifeEventCount:0,news:[],seasonHistory:[],careerAwards:[],careerSalary:0,careerGames:0,careerPtsTotal:0,careerRebTotal:0,careerAstTotal:0,chainTitles:[],retired:false,retirementReason:"",peakOverall:0,ageDeclineStage:0,careerMVP:0,careerFirstTeam:0,careerSecondTeam:0,careerDPOY:0,careerScoringTitles:0,careerAssistTitles:0,
  careerReboundTitles:0,careerAllStar:0,careerFinalsMVP:0,careerNationalAwards:0,leagueHistory:{},teamsPlayed:[],tradeCount:0,
  surgeries:0,children:0,married:false,partnerName:"",partnerProfile:{},romanceCandidate:{},formerPartners:[],relationshipYears:0,romanceAttempts:0,affairCount:0,endorsementIncome:0,careerBlocksTotal:0,
@@ -7289,10 +7306,10 @@ function startCareer(){
     recentEvents:[],feedHistory:[],expandedFeedYear:null,showOlderFeedYears:false,pendingRenewalOffer:null,pendingNBAOffer:null,marketOriginTeam:"",marketOriginLeague:"",marketReturnOffer:null,marketReturnMode:"",
     medicalProtectionUntilYear:0,medicalProtectionReason:"",medicalProtectedArea:"",postOpCareChosen:false,lastMajorInjuryYear:0,
     lastDanceActive:false,lastDanceUsed:false,retirementDefianceUsed:false,retirementDefianceSucceeded:false,retirementPressureUsed:false,retirementCrisisCount:0,retirementCrisisReason:"",homecomingTeam:"",homecomingRegion:"",
-    publicCareerId:"",publicCareerUploadId:"",leaderboardChoice:null,retirementRankSummary:null,careerUploadError:null,diceRevealCount:0,diceRolling:false,
+ publicCareerId:"",publicCareerUploadId:"",leaderboardChoice:null,retirementRankSummary:null,careerUploadError:null,diceRevealCount:0,diceRolling:false,chenDreamChampion:false,
     developmentSeasons:0,developmentLastChanceUsed:false,firstFullProAge:null,pendingSeasonAdvance:false,franchiseTeam:""};
 
- p.team=HBL_TEAMS[ri(RNG(p.seed+"hbl-team"),0,HBL_TEAMS.length-1)];
+ p.team=(blessed||maxTalent)?"桃園農工":HBL_TEAMS[ri(RNG(p.seed+"hbl-team"),0,HBL_TEAMS.length-1)];
  document.getElementById("setup").classList.add("hidden");document.getElementById("game").classList.remove("hidden");
  logIt(`16歲，加入 ${p.team} 籃球隊。`);ensureTeamHistory();pushNews(`🆕 ${p.name} 加入 ${p.team}，籃球人生正式開始`);showCareerChapter("highschoolStart");saveCareerNow();
 }
@@ -9943,7 +9960,7 @@ function showTraining(){
  p.preseasonPlanNotice="";
  let r=RNG(p.seed+"training-"+p.year+"-"+p.path);
  let count=p.age<22?ri(r,4,6):ri(r,3,6);
- p.dice=Array.from({length:count},()=>ri(r,1,6));p.used=Array(count).fill(false);p.trainingUndo=[];selectedDie=null;
+ p.dice=(isBlessedPlayer(p?.name)||isMaxTalentPlayer(p?.name))?Array.from({length:count},()=>6):Array.from({length:count},()=>ri(r,1,6));p.used=Array(count).fill(false);p.trainingUndo=[];selectedDie=null;
  p.diceRevealCount=0;p.diceRolling=true;
  let sixes=p.age<22?p.dice.filter(x=>x===6).length:0;
  if(!p.genius&&p.age<22&&sixes){
@@ -10302,6 +10319,10 @@ function officialSeniorCompetition(){
 function jonesCupCompetition(){
  return {id:"jones_cup",event:"威廉瓊斯盃國際籃球邀請賽",kind:"invitation",threshold:72,reference:64,baseChance:.15,maxChance:.55,prestige:.9,fatigue:9,selectionNote:"偏重近況、位置需求與培訓價值，不等同 FIBA 正式大賽"};
 }
+function olympicCompetition(){
+ return {id:"olympics",event:"FIFA 奧運",kind:"tournament",threshold:94,reference:80,baseChance:.06,maxChance:.34,prestige:3.6,fatigue:13,selectionNote:"四年一次的最高舞台，名單只留給國際級巔峰球員"};
+}
+function isOlympicYear(){return p.year>=2028&&p.year%4===0}
 function youthCompetitionProfile(level){
  if(level==="U18")return p.year%2===0
   ? {id:"u18_asia",event:"FIBA U18 亞洲盃",kind:"tournament",threshold:56,reference:54,baseChance:.12,maxChance:.48,prestige:1.5,fatigue:8,selectionNote:"青年旗艦賽事，重視同齡即戰力與位置平衡"}
@@ -10311,7 +10332,7 @@ function youthCompetitionProfile(level){
   : {id:"jones_development",event:"瓊斯盃培訓代表隊",kind:"invitation",threshold:62,reference:58,baseChance:.14,maxChance:.48,prestige:.7,fatigue:8,selectionNote:"培訓與測試性質，門檻低於成人正式 FIBA 名單"};
 }
 function nationalCompetitionById(level,id=""){
- const options=level==="SENIOR"?[officialSeniorCompetition(),jonesCupCompetition()]:[youthCompetitionProfile(level)];
+ const options=level==="SENIOR"?[officialSeniorCompetition(),jonesCupCompetition(),olympicCompetition()]:[youthCompetitionProfile(level)];
  return options.find(x=>x.id===id)||options[0];
 }
 function nationalSelectionScore(profile=officialSeniorCompetition(),youth=false){
@@ -10450,6 +10471,10 @@ function buildSeasonSpecialQueue(){
  let q=[];
  const nt=nationalTeamOpportunity();
  if(nt)q.push({kind:"national",nationalLevel:nt.level,nationalCompetition:nt.competition,nationalSelection:nt.selection,title:nt.title,desc:nt.desc});
+ if(isOlympicYear()&&p.age>=19&&p.age<=37&&(isProPath()||isCollegePath())){
+   const olympics=olympicCompetition(),selection=passesNationalSelection("SENIOR",olympics);
+   if(selection.ok)q.push({kind:"national",nationalLevel:"SENIOR",nationalCompetition:olympics,nationalSelection:selection,title:"成人代表隊奧運徵召",desc:`你進入 ${olympics.event} 集訓名單。${olympics.selectionNote}。`});
+ }
  let romance=buildRomanceSpecial();if(romance)q.push(romance);
  let offCourt=buildOffCourtSpecial();if(offCourt)q.push(offCourt);
  let career=buildCareerExtraSpecial();if(career)q.push(career);
@@ -11018,7 +11043,26 @@ const TITLE_DEFS={
  uncrowned_king:{name:"無冕之王",rarity:"epic",effect:"沒有職業冠軍，仍靠頂級巔峰與個人榮譽留下時代地位。",unlock:"沒有職業冠軍，巔峰 OVR 88，且具 MVP／多次年度第一隊／明星賽履歷。"},
  second_wind:{name:"不服老",rarity:"rare",effect:"市場關門後仍靠封閉測試贏回最後一張職業合約。",unlock:"生涯續命抉擇中自費測試成功。"},
  homecoming:{name:"落葉歸根",rarity:"rare",effect:"以出生地與台灣職涯連結完成家鄉最後一舞。",unlock:"接受返鄉告別合約並完成最後一季。"},
- salary_thief:{name:"薪水小偷",rarity:"negative",negative:true,effect:"高額合約連續未能換成相應上場角色與場上產量。",unlock:"至少 2 季高薪低效，或累積高薪與整體產量出現明顯落差。"}
+ salary_thief:{name:"薪水小偷",rarity:"negative",negative:true,effect:"高額合約連續未能換成相應上場角色與場上產量。",unlock:"至少 2 季高薪低效，或累積高薪與整體產量出現明顯落差。"},
+
+ os:{name:"作業系統4分",rarity:"rare",effect:"18歲解鎖｜投射能力 +2。",unlock:"陳偉振、陳威震專屬年齡彩蛋。"},
+ three_cups_yakult:{name:"三杯多多",rarity:"rare",effect:"20歲解鎖｜投射能力 +2。",unlock:"陳偉振、陳威震專屬年齡彩蛋。"},
+ gang_honglai:{name:"見宏來打球",rarity:"rare",effect:"22歲解鎖｜終結能力 +2。",unlock:"陳偉振、陳威震專屬年齡彩蛋。"},
+ nandian_water:{name:"南電杯顧水",rarity:"rare",effect:"23歲解鎖｜體能 +5。",unlock:"陳偉振、陳威震專屬年齡彩蛋。"},
+ dapingtin_alt_service:{name:"大坪頂替代役",rarity:"rare",effect:"24歲解鎖｜體能 +5。",unlock:"陳偉振、陳威震專屬年齡彩蛋。"},
+ who_is_chen:{name:"誰是陳偉振",rarity:"rare",effect:"16歲解鎖｜控球 +5。",unlock:"陳偉振、陳威震專屬年齡彩蛋。"},
+ lock_door_love:{name:"鎖門電愛",rarity:"rare",effect:"17歲解鎖｜傳球 +5。",unlock:"陳偉振、陳威震專屬年齡彩蛋。"},
+ spirit_of_zui巴:{name:"最巴精神",rarity:"epic",effect:"19歲解鎖｜體能 +8、投射 +8、終結 +10。",unlock:"陳偉振、陳威震專屬年齡彩蛋。"},
+ middle_part_brother:{name:"中分哥哥",rarity:"rare",effect:"21歲解鎖｜球商 +5。",unlock:"陳偉振、陳威震專屬年齡彩蛋。"},
+ bird_smoking:{name:"阿鳥抽菸",rarity:"negative",negative:true,effect:"25歲解鎖｜球商 -5。",unlock:"陳偉振、陳威震專屬負面年齡彩蛋。"},
+ angle_breaker:{name:"angle breaker",rarity:"rare",effect:"控球 +4、終結 +2。",unlock:"控球能力達到 80，且成功完成 5 次以上事件。"},
+ dongde_chen_student:{name:"同德國小陳同學",rarity:"rare",effect:"球商 +3、傳球 +2。",unlock:"高中生涯完成第一季。"},
+ little_mage_heart:{name:"小法師出心之剛",rarity:"rare",effect:"防守 +3、籃板 +2。",unlock:"球商與投射能力都達到 75。"},
+ one_man_court:{name:"一個人的球場",rarity:"rare",effect:"體能 +3、信心 +5。",unlock:"年滿 18 歲且累積成功處理 10 次事件。"},
+ cook_fish:{name:"處理你像在料理魚",rarity:"rare",effect:"終結 +4、投射 +2。",unlock:"終結與投射能力都達到 80。"},
+ ransomware:{name:"勒索病毒",rarity:"negative",negative:true,effect:"紀律 -8、球商 -2。",unlock:"紀律降至 35 以下。"},
+ lin_legacy:{name:"書豪繼承人",rarity:"rare",effect:"球商 +3、傳球 +2。",unlock:"選擇球衣號碼 7 或 17。"},
+ caught_mahjong:{name:"偷打麻將被抓",rarity:"negative",negative:true,effect:"紀律 -5、信心 -4。",unlock:"成年後低機率觸發的場外風波。"}
 };
 function titleDefinition(raw){
  const t=typeof raw==="string"?{id:"",name:raw}:raw||{};
@@ -11039,6 +11083,41 @@ function unlockTitle(id){
  p.titles.push(obj);p.titleHistory.push({year:p.year,id,name:d.name});logIt(`🏷️ 解鎖稱號：${d.name}`);pushNews(`🏷️ ${p.name} 解鎖稱號【${d.name}】`);
  return `<div class="titleUnlock"><b>🏷️ 特殊稱號解鎖｜${d.name}</b><br><span class="mut">${d.effect}</span></div>`;
 }
+function unlockTitleWithStats(id,changes){
+ const html=unlockTitle(id);
+ if(!html)return "";
+ const results=(changes||[]).map(([stat,amount])=>{
+   const before=p.stats[stat]||0;
+   p.stats[stat]=Math.max(20,Math.min(99,before+amount));
+   return `${L[stat]} ${before} → ${p.stats[stat]}`;
+ });
+ return results.length?html.replace("</div>",`<br>${results.join("｜")}</div>`):html;
+}
+function checkChenWeizhenAgeTitles(){
+ if(!isBlessedPlayer(p?.name)&&!isMaxTalentPlayer(p?.name))return "";
+ const rewards=[
+   [16,"who_is_chen",[["handle",5]]],
+   [17,"lock_door_love",[["pass",5]]],
+   [18,"os",[["shoot",2]]],
+   [19,"spirit_of_zui巴",[["ath",8],["shoot",8],["finish",10]]],
+   [20,"three_cups_yakult",[["shoot",2]]],
+   [21,"middle_part_brother",[["iq",5]]],
+   [22,"gang_honglai",[["finish",2]]],
+   [23,"nandian_water",[["ath",5]]],
+   [24,"dapingtin_alt_service",[["ath",5]]],
+   [25,"bird_smoking",[["iq",-5]]]
+ ];
+ let html="";
+ for(const [age,id,changes] of rewards){
+   if(p.age>=age)html+=unlockTitleWithStats(id,changes);
+ }
+ if(p.age>=24&&!p.chenDreamChampion){
+   p.chenDreamChampion=true;
+   const championHTML=unlockTitle("champion");
+   html+=`<div class="titleUnlock"><b>🌙 夢境彩蛋｜老大托夢</b><br>夜裡，老大來到你的夢裡。他看著 ${p.name}，認真地說：「你是天生的籃球天才。每次下班後，不管老婆怎麼勸你休息，你都還是回到球場，認真練球、反覆投籃。這份執著，值得我把最巴火炬傳承給你。」<br>老大把最巴的武功與信念交到你手上；醒來後，你正式掌握了冠軍 DNA。</div>${championHTML}`;
+ }
+ return html;
+}
 function injuryRiskModifier(){
  let mod=0;
  if(hasTitle("ironman"))mod-=8;
@@ -11057,7 +11136,16 @@ function eventChanceModifier(type){
  return mod;
 }
 function titleChecks(){
- let html="";
+ let html=checkChenWeizhenAgeTitles();
+ if(!hasTitle("dongde_chen_student")&&p.path==="HBL"&&p.age>=17)html+=unlockTitleWithStats("dongde_chen_student",[["iq",3],["pass",2]]);
+ if(!hasTitle("angle_breaker")&&p.stats.handle>=80&&p.eventSuccesses>=5)html+=unlockTitleWithStats("angle_breaker",[["handle",4],["finish",2]]);
+ if(!hasTitle("little_mage_heart")&&p.stats.iq>=75&&p.stats.shoot>=75)html+=unlockTitleWithStats("little_mage_heart",[["defense",3],["rebound",2]]);
+ if(!hasTitle("one_man_court")&&p.age>=18&&p.eventSuccesses>=10){html+=unlockTitleWithStats("one_man_court",[["ath",3]]);p.confidence=Math.min(100,p.confidence+5)}
+ if(!hasTitle("cook_fish")&&p.stats.finish>=80&&p.stats.shoot>=80)html+=unlockTitleWithStats("cook_fish",[["finish",4],["shoot",2]]);
+ if(!hasTitle("ransomware")&&p.discipline<=35){html+=unlockTitleWithStats("ransomware",[["iq",-2]]);p.discipline=Math.max(0,p.discipline-8)}
+ if(!hasTitle("lin_legacy")&&[7,17].includes(Number(p.jerseyNumber)))html+=unlockTitleWithStats("lin_legacy",[["iq",3],["pass",2]]);
+ const mahjongRoll=RNG(`${p.seed}-caught-mahjong-${p.year}`)();
+ if(!hasTitle("caught_mahjong")&&p.age>=18&&mahjongRoll<.08){html+=unlockTitle("caught_mahjong");p.discipline=Math.max(0,p.discipline-5);p.confidence=Math.max(0,p.confidence-4)}
  if(p.clutchWins>=3&&!hasTitle("clutch"))html+=unlockTitle("clutch");
  if(p.eventSuccesses>=8&&!hasTitle("veteran"))html+=unlockTitle("veteran");
  if(p.strategyStats.risk.best>=3&&!hasTitle("daredevil"))html+=unlockTitle("daredevil");
@@ -11147,6 +11235,7 @@ function confidenceChanceMod(){return confidenceLabel().mod}
 function confidencePerformanceMod(){return Math.max(-1,Math.min(1,((p.confidence??50)-50)/50))}
 
 function eventChance(type){
+ if(isBlessedPlayer(p?.name)||isMaxTalentPlayer(p?.name))return 95;
  let st=strategyOf(type),c=strategyBase(st);
  if(st==="risk"&&hasTitle("daredevil"))c=60;
  if(st==="risk"&&hasTitle("gambler"))c=66;
@@ -11158,6 +11247,7 @@ function eventChance(type){
  return Math.max(10,Math.min(95,Math.round(c)));
 }
 function previewChance(type){
+ if(isBlessedPlayer(p?.name)||isMaxTalentPlayer(p?.name))return 95;
  let st=strategyOf(type),c=strategyBase(st);
  if(st==="risk"&&hasTitle("daredevil"))c=60;
  if(st==="risk"&&hasTitle("gambler"))c=66;
