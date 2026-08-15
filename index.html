@@ -4227,6 +4227,7 @@ body.retirementMode .legacyHero .legacyMeta{margin-top:7px!important;color:#aab8
 }
 .playerAvatar svg,.legacyPortrait svg,.publicPortrait svg,
 .playerAvatar .avatarComposite,.legacyPortrait .avatarComposite,.publicPortrait .avatarComposite{display:block;width:100%;height:100%}
+.playerAvatar .avatarCustomImage,.legacyPortrait .avatarCustomImage,.publicPortrait .avatarCustomImage{display:block;width:100%;height:100%;object-fit:cover;object-position:center 18%}
 .avatarComposite{position:relative;overflow:hidden;background:#0b151c;isolation:isolate}
 .avatarPortraitRig{position:absolute;inset:0;transform-origin:50% 50%}
 .avatarPortraitLayer{position:absolute;background-repeat:no-repeat;background-size:400% 400%}
@@ -5961,7 +5962,7 @@ window.BL_ONLINE_CONFIG = {
    const tier=publicPower>=70000?"歷史級巨星":publicPower>=45000?"聯盟傳奇":publicPower>=28000?"明星級生涯":publicPower>=15000?"優秀職業球員":"職業旅人";
    content.innerHTML=`<div class="publicLegacy">
      <div class="publicLegacyTop">
-       <div class="publicHeroIdentity"><div class="publicPortrait">${playerAvatarSVG(cd.avatar_seed||`PUBLIC-${r.id||r.player_name}`,r.position||"PG",r.retired_age||40,`${r.player_name||"球員"} 的球員頭像`)}</div><div><div class="legacyKicker">BasketballLife · PUBLIC COURT LEGACY</div><div class="legacyName">${esc(r.player_name)}</div><div class="legacyMeta">玩家 <b>${esc(r.nickname)}</b>｜${esc(r.position||"")}${cd.height_cm?`・${cd.height_cm} cm｜臂展 ${cd.wingspan_cm||"—"} cm`:""}${cd.birthplace&&cd.birthplace!=="未設定"?`｜${esc(cd.birthplace)}出身`:""}｜退役 ${r.retired_age||"-"} 歲｜${r.final_year||"-"} 年</div></div></div>
+       <div class="publicHeroIdentity"><div class="publicPortrait">${playerAvatarSVG(cd.avatar_seed||`PUBLIC-${r.id||r.player_name}`,r.position||"PG",r.retired_age||40,`${r.player_name||"球員"} 的球員頭像`,r.player_name)}</div><div><div class="legacyKicker">BasketballLife · PUBLIC COURT LEGACY</div><div class="legacyName">${esc(r.player_name)}</div><div class="legacyMeta">玩家 <b>${esc(r.nickname)}</b>｜${esc(r.position||"")}${cd.height_cm?`・${cd.height_cm} cm｜臂展 ${cd.wingspan_cm||"—"} cm`:""}${cd.birthplace&&cd.birthplace!=="未設定"?`｜${esc(cd.birthplace)}出身`:""}｜退役 ${r.retired_age||"-"} 歲｜${r.final_year||"-"} 年</div></div></div>
        <div class="powerStamp"><small>BL POWER</small><b>${publicPower.toLocaleString()}</b><span>${tier}</span></div>
      </div>
      <div class="publicBadgeRow">${hof.length?`<span>🏛️ 名人堂 ×${hof.length}</span>`:""}${jersey.length?`<span>🏟️ 球衣退休 ×${jersey.length}</span>`:""}${r.seed_tier?`<span>🎴 ${esc(r.seed_tier)}</span>`:""}</div>
@@ -6820,7 +6821,7 @@ function playerAvatarSVG(avatarSeed,pos="PG",age=16,label="球員頭像"){
    <rect width="100" height="100" fill="url(#${uid}light)"/>
  </svg>`;
 }
-function renderPlayerAvatar(el,avatarSeed,pos,age,label){if(el)el.innerHTML=playerAvatarSVG(avatarSeed,pos,age,label)}
+function renderPlayerAvatar(el,avatarSeed,pos,age,label,playerName=""){if(el)el.innerHTML=playerAvatarSVG(avatarSeed,pos,age,label,playerName)}
 function drawPlayerAvatarCanvas(c,x,y,size,avatarSeed,pos="PG",age=16){
  const a=avatarProfile(avatarSeed,pos),older=Number(age)>=34;if(Number(age)>=38)a.hair="#5b5754";
  c.save();c.translate(x,y);c.scale(size/100,size/100);c.beginPath();c.rect(0,0,100,100);c.clip();
@@ -6933,9 +6934,19 @@ function modularAvatarAgeSVG(age){
  const mature=Number(age)>=32,veteran=Number(age)>=38;if(!mature)return "";
  return `<svg class="avatarPortraitAge" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="${veteran?"#4a2a21":"#5b3328"}" stroke-width="${veteran?.72:.52}" stroke-linecap="round" opacity="${veteran?.64:.36}"><path d="M31 48Q36 46 41 48"/><path d="M59 48Q64 46 69 48"/>${veteran?'<path d="M39 57Q42 55 45 56"/><path d="M55 56Q58 55 62 57"/><path d="M43 65Q50 68 57 65"/>':""}</g></svg>`;
 }
-function playerAvatarSVG(avatarSeed,pos="PG",age=16,label="球員頭像"){
+const CUSTOM_PLAYER_AVATARS={
+ "陳偉振":"./chenweichen.jpeg",
+ "陳威震":"./chenweichen_max.jpg"
+};
+function customPlayerAvatarImage(name=""){
+ const value=String(name||"").trim();
+ return CUSTOM_PLAYER_AVATARS[value]||"";
+}
+function playerAvatarSVG(avatarSeed,pos="PG",age=16,label="球員頭像",playerName=""){
  const a=modularAvatarProfile(avatarSeed,pos),transform=modularAvatarTransform(a);
  const safe=String(label||"球員頭像").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+ const customImage=customPlayerAvatarImage(playerName);
+ if(customImage)return `<span class="avatarComposite" role="img" aria-label="${safe}"><img class="avatarCustomImage" src="${customImage}" alt=""></span>`;
  const veteran=Number(age)>=38;
  const hairTone=["","filter:brightness(.88) saturate(.92)","filter:brightness(1.08) saturate(.76)"][a.hairTone],faceTone=modularAvatarFaceFilter(a);
  const hairFilter=veteran?"filter:saturate(.28) brightness(1.15)":hairTone;
@@ -6955,7 +6966,17 @@ function drawModularAvatarLayer(c,record,index,x,y,size){
  const cell=record.img.naturalWidth/4,sx=(index%4)*cell,sy=Math.floor(index/4)*cell;
  c.drawImage(record.img,sx,sy,cell,cell,x,y,size,size);return true;
 }
-function drawPlayerAvatarCanvas(c,x,y,size,avatarSeed,pos="PG",age=16){
+function drawPlayerAvatarCanvas(c,x,y,size,avatarSeed,pos="PG",age=16,playerName=""){
+ const customImage=customPlayerAvatarImage(playerName);
+ if(customImage){
+   const record=modularAvatarAsset(customImage),img=record.img;
+   c.save();c.beginPath();c.rect(x,y,size,size);c.clip();c.fillStyle="#0b151c";c.fillRect(x,y,size,size);
+   if(record.ready&&img.naturalWidth){
+     const crop=Math.min(img.naturalWidth,img.naturalHeight),sx=(img.naturalWidth-crop)/2,sy=Math.max(0,Math.min(img.naturalHeight-crop,img.naturalHeight*.12));
+     c.drawImage(img,sx,sy,crop,crop,x,y,size,size);
+   }
+   c.restore();return;
+ }
  const a=modularAvatarProfile(avatarSeed,pos),zoom=[1,1.022,1.042][a.variant],veteran=Number(age)>=38;
  const face=modularAvatarAsset(MODULAR_AVATAR_ASSETS.face),hair=modularAvatarAsset(MODULAR_AVATAR_ASSETS.hair);
  c.save();c.beginPath();c.rect(x,y,size,size);c.clip();c.fillStyle="#0b151c";c.fillRect(x,y,size,size);
@@ -6970,7 +6991,7 @@ function drawPlayerAvatarCanvas(c,x,y,size,avatarSeed,pos="PG",age=16){
  if(Number(age)>=32){c.save();c.strokeStyle=Number(age)>=38?"rgba(74,42,33,.64)":"rgba(91,51,40,.36)";c.lineWidth=Math.max(.55,size/150);c.lineCap="round";[[31,48,41,48],[59,48,69,48]].forEach(q=>{c.beginPath();c.moveTo(x+q[0]*size/100,y+q[1]*size/100);c.quadraticCurveTo(x+(q[0]+5)*size/100,y+(q[1]-2)*size/100,x+q[2]*size/100,y+q[3]*size/100);c.stroke()});c.restore()}
 }
 function preloadPlayerAvatarSprites(){
- return Promise.all(Object.values(MODULAR_AVATAR_ASSETS).map(src=>modularAvatarAsset(src).promise));
+ return Promise.all([...Object.values(MODULAR_AVATAR_ASSETS),...Object.values(CUSTOM_PLAYER_AVATARS)].map(src=>modularAvatarAsset(src).promise));
 }
 function cleanSeedInput(value){return String(value||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8)}
 function setupSeedValue(){return cleanSeedInput(document.getElementById("seed")?.value||"")}
@@ -7332,7 +7353,7 @@ function render(){
  renderFeedHistory();
  setTimeout(fitGameToViewport,0);
  pname.textContent=p.name;ppos.textContent=`${p.pos}・${p.heightCm||"—"}cm`;ppos.title=`臂展 ${p.wingspanCm||"—"} cm｜出生地 ${p.birthplace||"未設定"}`;teamname.textContent=currentTeam()?`・${currentTeam()}`:"";
- renderPlayerAvatar(document.getElementById("playerAvatar"),p.avatarSeed,p.pos,p.age,`${p.name} 的球員頭像`);
+ renderPlayerAvatar(document.getElementById("playerAvatar"),p.avatarSeed,p.pos,p.age,`${p.name} 的球員頭像`,p.name);
  age.textContent=p.age;year.textContent=p.year;ovr.textContent=overall();path.textContent=p.path;
  if(injurySummary)injurySummary.innerHTML=p.injury?`目前傷勢：<span class="bad">${p.injury.name}（${p.injury.level}）</span>`:(p.injuryHistory.length?`傷病履歷：${p.injuryHistory.length} 次正式傷勢`:"目前沒有正式傷病紀錄。");
  if(log)log.innerHTML=p.log.map(x=>`<div>• ${x}</div>`).join("");
@@ -9567,7 +9588,7 @@ function legacyHeaderHTML(){
  const last=legacyLastTeam(),games=Math.max(0,Number(p.careerGames||0)),careerPts=Math.round(Number(p.careerPtsTotal||0)),careerSeasons=(p.seasonHistory||[]).filter(x=>isProfessionalPathValue(x.path)).length,careerSalary=Number.isFinite(Number(p.careerBasketballSalary))?Number(p.careerBasketballSalary):Number(p.careerSalary||0);
  return `<header class="legacyHero">
    <div class="legacyHeroIdentity">
-     <div class="legacyPortrait">${playerAvatarSVG(p.avatarSeed,p.pos,p.age,`${p.name} 的球員頭像`)}</div>
+     <div class="legacyPortrait">${playerAvatarSVG(p.avatarSeed,p.pos,p.age,`${p.name} 的球員頭像`,p.name)}</div>
      <div class="legacyHeroCopy">
        <div class="legacyHeroKicker"><span>CAREER FINALE</span> ${retirementExitClass()==="ceremony"?"引退之夜":retirementExitClass()==="farewell"?"告別球場":"生涯終章"}</div>
        <div class="legacyName">${escapeFeedText(p.name)}</div>
@@ -9844,7 +9865,7 @@ function buildCareerShareCanvas(){
  const best=Object.values(profiles).sort((a,b)=>b.score-a.score)[0],last=legacyLastTeam();
  const hero=c.createLinearGradient(45,40,1155,300);hero.addColorStop(0,"#16242d");hero.addColorStop(.65,"#101920");hero.addColorStop(1,"#25180e");box(45,40,1110,255,hero,"#53616a",12);
  box(70,65,190,31,palette.orange,palette.orange,3);txt("RETIREMENT LEGACY",165,87,14,"#17110b",true,"center");
- box(70,116,155,155,"#07141b",palette.brown,11);drawPlayerAvatarCanvas(c,74,120,147,p.avatarSeed,p.pos,p.age);
+ box(70,116,155,155,"#07141b",palette.brown,11);drawPlayerAvatarCanvas(c,74,120,147,p.avatarSeed,p.pos,p.age,p.name);
  txt(best?.title||"籃球生涯終章",250,139,24,palette.gold,true);txt(p.name,250,190,[...String(p.name||"")].length>7?40:50,palette.text,true);
  txt(`${p.pos}｜${p.heightCm||"—"}cm・臂展 ${p.wingspanCm||"—"}cm｜${p.birthplace||"未設定"}出身`,250,226,17,palette.soft);
  txt(`2026–${p.year}｜${p.age}歲引退｜最後效力 ${last.team||p.team||"—"}・${last.path?leagueDisplay(last.path):leagueDisplay(p.path)}`,250,258,16,palette.muted);
