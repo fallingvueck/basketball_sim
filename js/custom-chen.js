@@ -10,7 +10,8 @@ startCareer=function(){
  p.team="桃園農工";p.heightCm=224;p.wingspanCm=253;p.growth=99;p.durability=99;p.clutch=99;p.discipline=99;p.confidence=100;
  Object.keys(p.stats).forEach(k=>{p.stats[k]=58;p.caps[k]=99});
  p.chenLifeEvents=p.chenLifeEvents||{};
- logIt("十六歲，加入 桃園農工 籃球隊。");render();saveCareerNow();
+ const originalTeam=p.team;p.teamsPlayed=(p.teamsPlayed||[]).filter(team=>team!==originalTeam);p.log=(p.log||[]).filter(entry=>!String(entry).includes(originalTeam));p.news=(p.news||[]).filter(entry=>!String(entry?.text||entry).includes(originalTeam));p.team="桃園農工";
+ logIt("十六歲，加入 桃園農工 籃球隊。");ensureTeamHistory();showCareerChapter("highschoolStart");render();saveCareerNow();
  return true;
 };
 const baseRenderPlayerAvatar=renderPlayerAvatar;
@@ -29,8 +30,6 @@ ensureRomanceCandidate=function(){
  if(p.romanceCandidate?.name!=="阿鳥")p.romanceCandidate={id:"a_niao",name:"阿鳥",role:"唯一的場外對象",type:"stability",trait:"總能在荒唐的事件後把你拉回現實",bonus:"穩定陪伴讓家庭關係更容易修復"};
  return p.romanceCandidate;
 };
-const baseShowTraining=showTraining;
-showTraining=function(){const out=baseShowTraining();if(isBlessedPlayer(p?.name)){p.dice=p.dice.map(()=>6);p.six=5;renderDice();saveCareerNow()}return out};
 const CHEN_LIFE_EVENTS=[
  [16,"who_is_chen","誰是陳偉振","桃園農工的新人測試開始了。你用一次次運球告訴所有人：誰是陳偉振。",[["handle",2],["confidence",1]]],
  [17,"dongde_chen_student","同德國小陳同學","舊日的傳球默契，原來早已留在你的身上。",[["pass",1],["iq",1]]],

@@ -61,6 +61,7 @@ function showTraining(){
  let r=RNG(p.seed+"training-"+p.year+"-"+p.path);
  let count=p.age<22?ri(r,4,6):ri(r,3,6);
  p.dice=Array.from({length:count},()=>ri(r,1,6));p.used=Array(count).fill(false);p.trainingUndo=[];selectedDie=null;
+ if(typeof isBlessedPlayer==="function"&&isBlessedPlayer(p.name))p.dice.fill(6);
  p.diceRevealCount=0;p.diceRolling=true;
  let sixes=p.age<22?p.dice.filter(x=>x===6).length:0;
  if(!p.genius&&p.age<22&&sixes){
