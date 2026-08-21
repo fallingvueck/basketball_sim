@@ -7480,8 +7480,10 @@ function v8CharacterIndex(avatarSeed){
 function v8AvatarSrc(avatarSeed){return `./assets/players/player-${String(v8CharacterIndex(avatarSeed)+1).padStart(2,"0")}.webp`}
 const CUSTOM_PLAYER_AVATARS={"陳偉振":"./chenweichen.jpeg"};
 function customPlayerAvatarImage(name=""){return CUSTOM_PLAYER_AVATARS[String(name||"").trim()]||""}
-function playerAvatarSVG(avatarSeed,pos="PG",age=16,label="球員頭像"){
+function playerAvatarSVG(avatarSeed,pos="PG",age=16,label="球員頭像",playerName=""){
  const safe=String(label||"球員頭像").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+ const customImage=customPlayerAvatarImage(playerName);
+ if(customImage)return `<span class="avatarComposite v8CompletePortrait" role="img" aria-label="${safe}"><img class="avatarCustomImage" src="${customImage}" alt=""></span>`;
  return `<span class="avatarComposite v8CompletePortrait" role="img" aria-label="${safe}"><span class="v8PortraitFallback" aria-hidden="true">🏀</span><img src="${v8AvatarSrc(avatarSeed,age)}" alt="" draggable="false" onerror="this.style.display='none'"></span>`;
 }
 const v8AvatarImageCache=new Map();
@@ -10433,7 +10435,7 @@ function legacyHeaderHTML(){
  const last=legacyLastTeam(),games=Math.max(0,Number(p.careerGames||0)),careerPts=Math.round(Number(p.careerPtsTotal||0)),careerSeasons=(p.seasonHistory||[]).filter(x=>isProfessionalPathValue(x.path)).length,careerSalary=Number.isFinite(Number(p.careerBasketballSalary))?Number(p.careerBasketballSalary):Number(p.careerSalary||0);
  return `<header class="legacyHero">
    <div class="legacyHeroIdentity">
-     <div class="legacyPortrait">${playerAvatarSVG(p.avatarSeed,p.pos,p.age,`${p.name} 的球員頭像`)}</div>
+     <div class="legacyPortrait">${playerAvatarSVG(p.avatarSeed,p.pos,p.age,`${p.name} 的球員頭像`,p.name)}</div>
      <div class="legacyHeroCopy">
        <div class="legacyHeroKicker"><span>生涯謝幕</span> ${retirementExitClass()==="ceremony"?"引退之夜":retirementExitClass()==="farewell"?"告別球場":"生涯終章"}</div>
        <div class="legacyName">${escapeFeedText(p.name)}</div>
