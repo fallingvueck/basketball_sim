@@ -7,8 +7,8 @@ const baseStartCareer=startCareer;
 startCareer=function(){
  baseStartCareer();
  if(!isBlessedPlayer(p?.name))return;
- p.team="桃園農工";p.heightCm=224;p.wingspanCm=253;p.growth=99;p.durability=99;p.clutch=99;p.discipline=99;p.confidence=100;
- Object.keys(p.stats).forEach(k=>{p.stats[k]=58;p.caps[k]=99});
+ p.team="桃園農工";p.heightCm=224;p.wingspanCm=253;p.seedTier="SSS+";p.seedTierLabel="💠 SSS+ 神話";p.seedTierDesc="陳偉振專屬最高天賦。";p.growth=99;p.durability=99;p.clutch=99;p.discipline=99;p.confidence=100;
+ Object.keys(p.stats).forEach(k=>{p.stats[k]=68;p.caps[k]=99});
  p.chenLifeEvents=p.chenLifeEvents||{};
  const originalTeam=p.team;p.teamsPlayed=(p.teamsPlayed||[]).filter(team=>team!==originalTeam);p.log=(p.log||[]).filter(entry=>!String(entry).includes(originalTeam));p.news=(p.news||[]).filter(entry=>!String(entry?.text||entry).includes(originalTeam));p.team="桃園農工";
  logIt("十六歲，加入 桃園農工 籃球隊。");ensureTeamHistory();showCareerChapter("highschoolStart");render();saveCareerNow();
@@ -64,3 +64,7 @@ function nextChenLifeEvent(){if(!isBlessedPlayer(p?.name))return null;p.chenLife
 function resolveChenLifeEvent(id){const e=CHEN_LIFE_EVENTS.find(x=>x[1]===id);if(!e||!p)return;const [,eventId,name,text,effects]=e;p.chenLifeEvents[eventId]=true;const labels={confidence:"信心",discipline:"紀律",rep:"球隊評價",clutch:"關鍵能力",durability:"耐久",fatigue:"疲勞"},changes=[];effects.forEach(([k,n])=>{if(k in p.stats){p.stats[k]=Math.max(20,Math.min(99,p.stats[k]+n));changes.push(`${L[k]} ${n>0?"+":""}${n}`)}else{const max=["confidence","discipline","clutch","durability","fatigue"].includes(k)?100:99;p[k]=Math.max(k==="rep"?-99:0,Math.min(max,(p[k]||0)+n));changes.push(`${labels[k]} ${n>0?"+":""}${n}`)}});special.innerHTML=`<div class="outcome ${effects.some(([,n])=>n<0)?"fail":"success"}"><b>專屬事件完成｜${name}</b><br>${text}<div class="changes">${changes.map(x=>`<span class="change">${x}</span>`).join("")}</div></div>${unlockTitle(eventId)}`;choices.innerHTML="";logIt(`專屬事件｜${name}`);p.eventIndex++;next.textContent=p.eventIndex>=p.seasonEventCount?"進入特殊事件 →":"下一個一般事件 →";next.classList.remove("hidden");render();}
 const baseShowEvent=showEvent;
 showEvent=function(){const event=nextChenLifeEvent();if(!event)return baseShowEvent();p.stage="events";resetMain();render();const [,id,name,description]=event;chapter.textContent=`${p.year} · ${p.age}歲 · 陳偉振專屬事件`;title.textContent=name;document.getElementById("text").textContent=description;choices.innerHTML=`<button class="choice eventChoice" onclick="resolveChenLifeEvent('${id}')"><b>面對這段人生</b><small>事件會留下稱號與永久影響。</small></button>`;};
+const baseEventChance=eventChance,basePreviewChance=previewChance,baseNationalSelection=passesNationalSelection;
+eventChance=function(type){return isBlessedPlayer(p?.name)?95:baseEventChance(type)};
+previewChance=function(type){return isBlessedPlayer(p?.name)?95:basePreviewChance(type)};
+passesNationalSelection=function(level,profile){return isBlessedPlayer(p?.name)?{ok:true,score:999,chance:1,threshold:profile?.threshold||0}:baseNationalSelection(level,profile)};
