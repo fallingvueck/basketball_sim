@@ -7485,15 +7485,15 @@ function playerAvatarSVG(avatarSeed,pos="PG",age=16,label="球員頭像"){
  return `<span class="avatarComposite v8CompletePortrait" role="img" aria-label="${safe}"><span class="v8PortraitFallback" aria-hidden="true">🏀</span><img src="${v8AvatarSrc(avatarSeed,age)}" alt="" draggable="false" onerror="this.style.display='none'"></span>`;
 }
 const v8AvatarImageCache=new Map();
-function v8AvatarImage(avatarSeed,age){
- const src=v8AvatarSrc(avatarSeed,age);if(v8AvatarImageCache.has(src))return v8AvatarImageCache.get(src);
+function v8AvatarImage(avatarSeed,age,playerName=""){
+ const src=customPlayerAvatarImage(playerName)||v8AvatarSrc(avatarSeed,age);if(v8AvatarImageCache.has(src))return v8AvatarImageCache.get(src);
  const img=new Image(),record={img,ready:false,promise:null};img.decoding="async";
  record.promise=new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;record.ready=!!img.naturalWidth;resolve(record)};img.addEventListener("load",finish,{once:true});img.addEventListener("error",finish,{once:true});setTimeout(finish,5000)});img.src=src;v8AvatarImageCache.set(src,record);return record;
 }
-function drawPlayerAvatarCanvas(c,x,y,size,avatarSeed,pos="PG",age=16){
- const record=v8AvatarImage(avatarSeed,age);c.save();c.beginPath();c.rect(x,y,size,size);c.clip();c.fillStyle="#0b151c";c.fillRect(x,y,size,size);if(record.ready&&record.img.naturalWidth)c.drawImage(record.img,x,y,size,size);c.restore();
+function drawPlayerAvatarCanvas(c,x,y,size,avatarSeed,pos="PG",age=16,playerName=""){
+ const record=v8AvatarImage(avatarSeed,age,playerName);c.save();c.beginPath();c.rect(x,y,size,size);c.clip();c.fillStyle="#0b151c";c.fillRect(x,y,size,size);if(record.ready&&record.img.naturalWidth)c.drawImage(record.img,x,y,size,size);c.restore();
 }
-function preloadPlayerAvatarSprites(){return p?v8AvatarImage(p.avatarSeed,p.age).promise:Promise.resolve()}
+function preloadPlayerAvatarSprites(){return p?v8AvatarImage(p.avatarSeed,p.age,p.name).promise:Promise.resolve()}
 function selectedAvatarSeed(){return `V8-${String(chosenAvatarIndex+1).padStart(2,"0")}`}
 function renderAvatarPicker(){
  const preview=document.getElementById("avatarSetupPreview");if(preview)preview.innerHTML=playerAvatarSVG(selectedAvatarSeed(),chosenPos,17,"目前選擇的球員外觀");
@@ -7934,6 +7934,7 @@ function setReadingMode(mode,skipSave=false){
 }
 function logIt(x){p.log.unshift(`${p.year}｜${x}`);p.log=p.log.slice(0,50)}
 function render(){
+ normalizeRomanceToAniao();
  const gameEl=document.getElementById("game");if(gameEl)gameEl.dataset.stage=p.stage||"";
  const quickRestartBtn=document.getElementById("quickRestartBtn");
  if(quickRestartBtn)quickRestartBtn.classList.toggle("hidden",!p||p.retired);
@@ -9830,16 +9831,26 @@ const ROMANCE_PROFILE_POOL=[
  {id:"data_analyst",role:"運動數據分析師",type:"strategy",trait:"看得懂數字，也知道數字解釋不了全部",bonus:"球商與生涯規劃判斷更成熟",names:["游家寧","鍾羽薇","范宜真"]},
  {id:"alumni",role:"大學校友會企劃",type:"stability",trait:"從學生時期就看過你最普通的一面",bonus:"家庭關係較不易因名氣起伏",names:["劉書瑤","曹語芯","楊以晴"]}
 ];
-function romanceCandidateForCareer(){
+const ANIAO_ROMANCE_PROFILE={id:"a_niao",name:"阿鳥",role:"唯一的場外對象",type:"stability",trait:"總能在荒唐的事件後把你拉回現實",bonus:"穩定陪伴讓家庭關係更容易修復"};
+function standardRomanceCandidateForCareer(){
  const former=new Set((p.formerPartners||[]).map(x=>x.name));
  const options=ROMANCE_PROFILE_POOL.flatMap(profile=>profile.names.map(name=>({...profile,name,names:undefined}))).filter(x=>!former.has(x.name));
  const pool=options.length?options:ROMANCE_PROFILE_POOL.flatMap(profile=>profile.names.map(name=>({...profile,name,names:undefined})));
  const r=RNG(`${p.seed}-romance-${p.year}-${p.romanceAttempts||0}-${(p.formerPartners||[]).length}`);
  return {...pool[Math.floor(r()*pool.length)]};
 }
+function romanceCandidateForCareer(){return isBlessedPlayer(p?.name)?{...ANIAO_ROMANCE_PROFILE}:standardRomanceCandidateForCareer()}
 function ensureRomanceCandidate(){
- if(!p.romanceCandidate?.name)p.romanceCandidate=romanceCandidateForCareer();
+ if(isBlessedPlayer(p?.name)){
+  if(p.romanceCandidate?.name!=="阿鳥")p.romanceCandidate=romanceCandidateForCareer();
+ }else if(!p.romanceCandidate?.name){p.romanceCandidate=standardRomanceCandidateForCareer()}
  return p.romanceCandidate;
+}
+function normalizeRomanceToAniao(){
+ if(!p||!isBlessedPlayer(p.name))return;
+ if(p.partnerName&&p.partnerName!=="阿鳥"){p.partnerName="阿鳥";p.partnerProfile={...ANIAO_ROMANCE_PROFILE};}
+ if(p.romanceCandidate?.name&&p.romanceCandidate.name!=="阿鳥")p.romanceCandidate=romanceCandidateForCareer();
+ if(Array.isArray(p.formerPartners))p.formerPartners=p.formerPartners.map(entry=>({...entry,name:"阿鳥",role:ANIAO_ROMANCE_PROFILE.role}));
 }
 function activateRomanceCandidate(){
  const candidate=ensureRomanceCandidate();p.partnerProfile={...candidate};p.partnerName=candidate.name;p.romanceCandidate={};
@@ -10746,7 +10757,7 @@ function buildCareerShareCanvas(){
  const best=Object.values(profiles).sort((a,b)=>b.score-a.score)[0],last=legacyLastTeam();
  const hero=c.createLinearGradient(45,40,1155,300);hero.addColorStop(0,"#16242d");hero.addColorStop(.65,"#101920");hero.addColorStop(1,"#25180e");box(45,40,1110,255,hero,"#53616a",12);
  box(70,65,190,31,palette.orange,palette.orange,3);txt("BASKETBALLLIFE · 生涯結算",165,87,12,"#17110b",true,"center");
- box(70,116,155,155,"#07141b",palette.brown,11);drawPlayerAvatarCanvas(c,74,120,147,p.avatarSeed,p.pos,p.age);
+ box(70,116,155,155,"#07141b",palette.brown,11);drawPlayerAvatarCanvas(c,74,120,147,p.avatarSeed,p.pos,p.age,p.name);
  txt(best?.title||"籃球生涯終章",250,139,24,palette.soft,true);txt(p.name,250,190,[...String(p.name||"")].length>7?40:50,palette.orange,true);
  txt(`#${p.jerseyNumber??7}・${p.pos}・${p.handedness||"右手"}｜${p.heightCm||"—"}cm・臂展 ${p.wingspanCm||"—"}cm｜${p.birthplace||"未設定"}出身`,250,226,17,palette.soft);
  txt(`2026–${p.year}｜${p.age}歲引退｜最後效力 ${last.team||p.team||"—"}・${last.path?leagueDisplay(last.path):leagueDisplay(p.path)}`,250,258,16,palette.muted);
