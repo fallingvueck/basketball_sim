@@ -127,7 +127,7 @@
     const setup = document.getElementById("setup");
     const builder = setup?.querySelector(":scope > .setupBuilder");
     const start = document.getElementById("startCareerBtn");
-    if (!setup || !builder || !start || document.getElementById("blAdvancedSetup")) return;
+    if (!setup || !builder || !start || document.getElementById("blHomeCustomPanel")) return;
 
     const identity = setup.querySelector(":scope > .setupIdentity");
     const heroTitle = identity?.querySelector("h1");
@@ -143,40 +143,80 @@
     quick.className = "blQuickStartPromise";
     quick.innerHTML = `<b>名字＋位置，就能開始。</b><span>其他設定已自動備妥。</span>`;
     setup.insertBefore(quick, start);
-    start.classList.add("blFastStartButton");
-
-    const details = document.createElement("details");
-    details.id = "blAdvancedSetup";
-    details.className = "blAdvancedSetup";
-    details.innerHTML = `<summary><span><b>完整自訂球員</b><small>身材・外觀・出生地・世界 Seed</small></span><em>展開</em></summary><div class="blAdvancedSetupBody"></div>`;
-    start.insertAdjacentElement("afterend", details);
-
-    const body = details.querySelector(".blAdvancedSetupBody");
     const seedLabel = setup.querySelector(':scope > label[for="seed"]');
     const seed = setup.querySelector(":scope > .seed");
     const seedError = document.getElementById("seedError");
     const seedHelp = document.getElementById("seedHelp");
-    [builder, seedLabel, seed, seedError, seedHelp].forEach((node) => {
-      if (node) body.appendChild(node);
-    });
+    if (seedLabel) seedLabel.textContent = "世界 Seed";
 
     const nameLabel = setup.querySelector(':scope > label[for="playerNameInput"]');
     const nameInput = document.getElementById("playerNameInput");
     const positionLabel = [...setup.children].find((node) => node.tagName === "LABEL" && /選擇場上位置/.test(node.textContent || ""));
     const positionGrid = document.getElementById("posgrid");
     const continuePanel = document.getElementById("continueCareerPanel");
+    const communityInvite = setup.querySelector(":scope > .communityInviteCard");
     const creatorCredit = setup.querySelector(":scope > .creatorCredit");
     const quickPanel = document.createElement("div");
     quickPanel.className = "blHomeQuickPanel";
     setup.insertBefore(quickPanel, nameLabel || quick);
-    [nameLabel, nameInput, positionLabel, positionGrid, quick, start, details, continuePanel, creatorCredit].forEach((node) => {
+    [nameLabel, nameInput, positionLabel, positionGrid, quick].forEach((node) => {
       if (node) quickPanel.appendChild(node);
     });
 
-    details.addEventListener("toggle", () => {
-      const toggle = details.querySelector("summary em");
-      if (toggle) toggle.textContent = details.open ? "收合" : "展開";
-    });
+    const startActions = document.createElement("div");
+    startActions.className = "blHomeStartActions";
+    const customButton = document.createElement("button");
+    customButton.type = "button";
+    customButton.className = "blOpenCustomButton";
+    customButton.innerHTML = `<b>完整自訂球員 →</b><small id="blCustomSummary">身材・外觀・出生地</small>`;
+    startActions.append(start, customButton);
+    quickPanel.appendChild(startActions);
+
+    const seedPanel = document.createElement("div");
+    seedPanel.className = "blHomeSeedPanel";
+    [seedLabel, seed, seedError, seedHelp].forEach((node) => { if (node) seedPanel.appendChild(node); });
+    quickPanel.appendChild(seedPanel);
+    [continuePanel, communityInvite, creatorCredit].forEach((node) => { if (node) quickPanel.appendChild(node); });
+
+    const customPanel = document.createElement("section");
+    customPanel.id = "blHomeCustomPanel";
+    customPanel.className = "blHomeCustomPanel hidden";
+    customPanel.innerHTML = `<div class="blHomeCustomHead"><button type="button" class="blCustomBack">← 返回快速開始</button><small>PLAYER BUILDER</small><h2>完整自訂球員</h2><p id="blCustomPlayerMeta"></p></div><div class="blHomeCustomBody"></div><div class="blHomeCustomActions"><button type="button" class="blCustomApply">套用設定並返回</button><button type="button" class="blCustomStart">套用設定，開始生涯</button></div>`;
+    customPanel.querySelector(".blHomeCustomBody")?.appendChild(builder);
+    setup.appendChild(customPanel);
+
+    const syncCustomSummary = () => {
+      const pos = positionGrid?.querySelector(".pos.on b")?.textContent?.trim() || "PG";
+      const height = document.getElementById("heightInput")?.value || "—";
+      const wingspan = document.getElementById("wingspanInput")?.value || "—";
+      const birthplace = document.querySelector("#birthplaceInput .birthplaceChip.on")?.textContent?.trim() || "隨機";
+      const summary = document.getElementById("blCustomSummary");
+      const meta = document.getElementById("blCustomPlayerMeta");
+      if (summary) summary.textContent = `${pos}・${height} cm・臂展 ${wingspan} cm・${birthplace}`;
+      if (meta) meta.textContent = `${nameInput?.value.trim() || "籃球癡漢"}・${pos}`;
+    };
+    const showCustom = () => {
+      syncCustomSummary();
+      quickPanel.classList.add("hidden");
+      customPanel.classList.remove("hidden");
+      customPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    const showQuick = () => {
+      syncCustomSummary();
+      customPanel.classList.add("hidden");
+      quickPanel.classList.remove("hidden");
+      quickPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    customButton.addEventListener("click", showCustom);
+    customPanel.querySelector(".blCustomBack")?.addEventListener("click", showQuick);
+    customPanel.querySelector(".blCustomApply")?.addEventListener("click", showQuick);
+    customPanel.querySelector(".blCustomStart")?.addEventListener("click", () => window.safeStartCareer?.());
+    customPanel.addEventListener("input", syncCustomSummary);
+    customPanel.addEventListener("change", syncCustomSummary);
+    customPanel.addEventListener("click", () => setTimeout(syncCustomSummary, 0));
+    positionGrid?.addEventListener("click", () => setTimeout(syncCustomSummary, 0));
+    nameInput?.addEventListener("input", syncCustomSummary);
+    syncCustomSummary();
   }
 
   function trainingScore(player, key, credit, priority, priorPicks = 0) {
@@ -265,10 +305,6 @@
     return (hash >>> 0) % length;
   }
 
-  function stableStoryPick(items, key) {
-    return items[stableStoryIndex(key, items.length)] || items[0] || "";
-  }
-
   function seasonStorySentence(value) {
     return String(value || "")
       .replace(/^[•・\-\s]+/, "")
@@ -291,7 +327,10 @@
 
   function seasonStoryContext(player, season) {
     const stats = player.seasonStats || season || {};
-    const tournaments = Array.isArray(stats.tourneys) ? stats.tourneys : [];
+    const history = Array.isArray(player.seasonHistory) ? player.seasonHistory : [];
+    const seasonIndex = Math.max(0, history.indexOf(season));
+    const previous = seasonIndex > 0 ? history[seasonIndex - 1] : null;
+    const tournaments = Array.isArray(season.tourneys) ? season.tourneys : Array.isArray(stats.tourneys) ? stats.tourneys : [];
     const bestTournament = [...tournaments]
       .sort((a, b) => Number(b?.reward || 0) - Number(a?.reward || 0))[0] || null;
     const beats = (Array.isArray(season.storySummary) ? season.storySummary : [])
@@ -301,8 +340,10 @@
       return item?.chain || item?.worldShift || item?.major || item?.international || item?.offCourt
         || type === "event" || type === "life";
     }) || null;
-    const awards = beats.filter((item) => /MVP|年度|得分王|助攻王|籃板王|最佳防守/.test(String(item?.text || "")));
+    const awards = Array.isArray(season.seasonAwards) ? season.seasonAwards : beats.filter((item) => /MVP|年度|得分王|助攻王|籃板王|最佳防守/.test(String(item?.text || ""))).map(item => seasonStorySentence(item.text));
     return {
+      season,
+      previous,
       stats,
       tournaments,
       bestTournament,
@@ -322,121 +363,115 @@
       ast: Math.max(0, Number(season.ast ?? stats.ast ?? 0)),
       stl: Math.max(0, Number(season.stl ?? stats.stl ?? 0)),
       blk: Math.max(0, Number(season.blk ?? stats.blk ?? 0)),
+      ovr: Math.max(0, Number(season.ovr ?? player.peakOvr ?? 0)),
+      fg: Math.max(0, Number(season.fg ?? stats.fg ?? 0)),
+      three: Math.max(0, Number(season.three ?? stats.three ?? 0)),
+      scheduledGames: Math.max(0, Number(season.scheduledGames || (Number(season.games || 0) + Number(season.missedGames || 0)))),
       injuryMissed: Math.max(0, Number(season.injuryMissedGames || 0)),
       suspensionGames: Math.max(0, Number(season.suspensionGames || 0)),
     };
   }
 
-  function buildSeasonHeadline(context) {
-    const {
-      year, name, team, meaningfulBeat, injuryMissed, suspensionGames,
-      bestTournament, awards, games, mins, pts, reb, ast, stl, blk,
-    } = context;
-    const prefix = year ? `${year} 年，` : "這一季，";
-    if (meaningfulBeat) {
-      const beat = seasonStoryBeatParts(meaningfulBeat.text);
-      if (beat.title) {
-        if (beat.result === "大成功") return `${prefix}${name}在${team}面對「${beat.title}」時選擇「${beat.choice}」，結果大成功，打出整季最亮的一段表現。`;
-        if (beat.result === "成功") return `${prefix}${name}在${team}面對「${beat.title}」時選擇「${beat.choice}」，穩穩把這次考驗處理好。`;
-        return `${prefix}${name}在${team}面對「${beat.title}」時選擇「${beat.choice}」卻付出代價，這成了整季最難忘的一課。`;
-      }
-      return `${prefix}${name}在${team}遇上真正的轉折：${beat.raw}。`;
+  function signatureOpponentPoolForContext(context) {
+    if (context.season.path === "歐洲聯賽" && context.season.competition && typeof EUROPE_LEAGUES !== "undefined") {
+      const profile = EUROPE_LEAGUES.find((league) => league.label === context.season.competition);
+      if (profile) return profile.teams.filter((team) => team !== context.team);
     }
-    if (injuryMissed > 0 && suspensionGames > 0) {
-      return `${prefix}傷勢與場外代價同時襲來，${name}在${team}的球季被迫斷成好幾段。`;
-    }
-    if (injuryMissed > 0) {
-      return `${prefix}${name}少打了 ${injuryMissed} 場；這一年在${team}留下的，不只是數據，還有一次和身體的拉扯。`;
-    }
-    if (suspensionGames > 0) {
-      return `${prefix}${name}因場外事件缺席 ${suspensionGames} 場，${team}的這一季也因此換了方向。`;
-    }
-    if (bestTournament?.finish === "冠軍") {
-      return `${prefix}${name}和${team}把${bestTournament.name || "最重要的賽事"}冠軍留了下來，這成了整季最值得重播的一幕。`;
-    }
-    if (awards.length) {
-      return `${prefix}${name}在${team}把穩定表現打成了肯定：${seasonStorySentence(awards[0].text)}。`;
-    }
-    if (pts >= 20 || ast >= 7 || reb >= 10 || stl + blk >= 3) {
-      const signature = pts >= 20 ? `場均 ${pts} 分`
-        : ast >= 7 ? `場均 ${ast} 次助攻`
-          : reb >= 10 ? `場均 ${reb} 個籃板`
-            : `場均 ${(stl + blk).toFixed(1)} 次抄截與阻攻`;
-      return `${prefix}${name}在${team}找到自己的代表方式，靠${signature}讓這一年有了清楚的名字。`;
-    }
-    if (games > 0 && mins < 10) {
-      return `${prefix}${name}仍在${team}等待真正的上場機會；這不是突破的一年，卻可能是下一次選擇的起點。`;
-    }
-    return `${prefix}${name}在${team}打完 ${games} 場比賽；沒有煙火般的結局，卻讓下一次選擇有了重量。`;
+    const pools = {
+      HBL: typeof HBL_TEAMS !== "undefined" ? HBL_TEAMS : [],
+      UBA: typeof UBA_TEAMS !== "undefined" ? UBA_TEAMS : [],
+      "UBA 強權": typeof UBA_TEAMS !== "undefined" ? UBA_TEAMS : [],
+      日本大學: typeof JAPAN_COLLEGE_TEAMS !== "undefined" ? JAPAN_COLLEGE_TEAMS : [],
+      "NCAA D1": typeof NCAA_D1_TEAMS !== "undefined" ? NCAA_D1_TEAMS : [],
+      "NCAA D2": typeof NCAA_D2_TEAMS !== "undefined" ? NCAA_D2_TEAMS : [],
+      台灣職業: typeof PRO_TEAMS !== "undefined" ? PRO_TEAMS : [],
+      日本職業: typeof JAPAN_PRO_TEAMS !== "undefined" ? JAPAN_PRO_TEAMS : [],
+      韓國職業: typeof KOREA_PRO_TEAMS !== "undefined" ? KOREA_PRO_TEAMS : [],
+      CBA: typeof CBA_TEAMS !== "undefined" ? CBA_TEAMS : [],
+      "SBL／半職業": typeof SEMIPRO_TEAMS !== "undefined" ? SEMIPRO_TEAMS : [],
+      "NBA G League": typeof GLEAGUE_TEAMS !== "undefined" ? GLEAGUE_TEAMS : [],
+      歐洲聯賽: typeof EUROPE_TEAMS !== "undefined" ? EUROPE_TEAMS : [],
+      NBA: typeof NBA_TEAMS !== "undefined" ? NBA_TEAMS : [],
+    };
+    return (pools[context.season.path] || []).filter((team) => team !== context.team);
   }
 
-  function buildSeasonFanReactions(context, headline) {
-    const {
-      name, team, year, meaningfulBeat, injuryMissed, suspensionGames,
-      bestTournament, games, mins, pts, reb, ast, stl, blk,
-    } = context;
-    const rows = [];
-    const add = (tone, source, text) => {
-      const clean = String(text || "").trim();
-      if (!clean || rows.some((item) => item.text === clean)) return;
-      rows.push({ tone, source, text: clean });
+  function signatureGameDetails(context, game) {
+    const tournament = context.bestTournament || {};
+    const event = String(game.event || tournament.name || context.season.path || "年度賽事");
+    const finish = String(tournament.finish || "");
+    const stage = String(game.stage || ((event === "季後賽" || event.endsWith("季後賽"))
+      ? (finish === "冠軍" || finish === "亞軍" ? "總冠軍戰" : finish === "四強" ? "季後賽四強" : finish === "首輪晉級" ? "首輪晉級戰" : "季後賽首輪")
+      : (event === "例行賽" || event.endsWith("例行賽")) ? "例行賽關鍵戰"
+        : ({ 冠軍: "冠軍戰", 亞軍: "冠軍戰", 四強: "四強賽", 八強: "八強賽", 複賽: "複賽關鍵戰", 預賽: "分組賽" })[finish] || "年度關鍵戰"));
+    const key = `${context.name}-${context.year}-${context.team}-signature-detail`;
+    const pool = signatureOpponentPoolForContext(context);
+    const opponent = String(game.opponent || (pool.length ? pool[stableStoryIndex(`${key}-opponent`, pool.length)] : "") || "同級勁旅");
+    const favorable = finish === "冠軍" || finish === "首輪晉級" || (/例行賽關鍵戰|複賽關鍵戰/.test(stage) && stableStoryIndex(`${key}-result`, 4) > 0);
+    const result = String(game.result || (favorable ? "勝" : "敗"));
+    const highPace = ["NBA", "NBA G League", "CBA", "歐洲聯賽"].includes(context.season.path);
+    const winner = (highPace ? 91 : 69) + stableStoryIndex(`${key}-score`, highPace ? 29 : 24);
+    const margin = 2 + stableStoryIndex(`${key}-margin`, 12);
+    return {
+      ...game,
+      event,
+      stage,
+      opponent,
+      result,
+      scoreFor: Number(game.scoreFor || (result === "勝" ? winner : winner - margin)),
+      scoreAgainst: Number(game.scoreAgainst || (result === "勝" ? winner - margin : winner)),
     };
-    const key = `${context.name}-${context.year}-${context.team}`;
+  }
 
-    if (meaningfulBeat) {
-      const beat = seasonStoryBeatParts(meaningfulBeat.text);
-      const reaction = beat.title
-        ? ["大成功", "成功"].includes(beat.result)
-          ? `他真的敢選「${beat.choice}」，而且做成了。這種畫面才會讓人記一整季。`
-          : `選「${beat.choice}」的代價不小，但至少這一季不是一張沒有溫度的成績單。`
-        : `這季最後被記住的果然不是場均數字，而是「${beat.raw}」。`;
-      add(
-        meaningfulBeat.offCourt ? "critical" : "story",
-        meaningfulBeat.international ? "國家隊球迷" : meaningfulBeat.offCourt ? "賽後討論區" : "主場看台",
-        reaction
-      );
-    }
-    if (bestTournament?.finish === "冠軍") {
-      add("spark", `${team} 球迷`, stableStoryPick([
-        `冠軍到手那一刻，前面所有低潮都值得了。這就是我們會一直重播的球季。`,
-        `${bestTournament.name || "這座冠軍"}不是履歷上的一行而已，現場的人都知道這一季有多難。`,
-      ], `${key}-champion`));
-    }
-    if (injuryMissed > 0) {
-      add("support", "傷病討論區", stableStoryPick([
-        `少打的 ${injuryMissed} 場比任何數據都刺眼。先健康回來，故事才有下一章。`,
-        `這季最難看的不是成績，是每次名單上找不到他的名字。希望下季能完整回來。`,
-      ], `${key}-injury`));
-    }
-    if (suspensionGames > 0) {
-      add("critical", "球迷社群", `球迷可以接受投不進，但不能把缺席 ${suspensionGames} 場的場外代價當作沒發生。`);
-    }
-    if (pts >= 20) {
-      add("spark", "進攻組球迷", stableStoryPick([
-        `比分咬住的時候，我們第一個想到的就是把球交給 ${name}。`,
-        `${pts} 分不是刷出來的，很多晚上都是他把球隊從失速邊緣拉回來。`,
-      ], `${key}-scoring`));
-    } else if (ast >= 7) {
-      add("spark", "戰術版球迷", `${ast} 次助攻只是表面，真正好看的是 ${name} 把整隊的進攻帶活了。`);
-    } else if (reb >= 10 || stl + blk >= 3) {
-      add("spark", "防守組球迷", `有人先看得分，我只記得每個關鍵防守回合都能找到 ${name}。`);
-    }
-    if (games > 0 && mins < 10) {
-      add("quiet", "板凳席旁的球迷", `這季不像結局，比較像 ${name} 還沒拿到真正證明自己的機會。`);
-    }
+  function seasonSignatureGame(context) {
+    if (!context.games) return null;
+    const key = `${context.name}-${context.year}-${context.team}-signature`;
+    const bump = (slot, size) => stableStoryIndex(`${key}-${slot}`, size);
+    const game = context.season.signatureGame || {
+      minutes: Math.min(["NBA", "NBA G League"].includes(context.season.path) ? 48 : 40, Math.round(context.mins) + 2 + bump("min", 6)),
+      pts: Math.min(65, Math.max(Math.round(context.pts), Math.round(context.pts + Math.max(5, context.pts * .5) + bump("pts", 8)))),
+      reb: Math.min(25, Math.max(Math.round(context.reb), Math.round(context.reb + 2 + bump("reb", 5)))),
+      ast: Math.min(22, Math.max(Math.round(context.ast), Math.round(context.ast + 2 + bump("ast", 5)))),
+      stl: Math.min(9, Math.max(Math.round(context.stl), Math.round(context.stl + bump("stl", 3)))),
+      blk: Math.min(9, Math.max(Math.round(context.blk), Math.round(context.blk + bump("blk", 3)))),
+    };
+    if (!Number.isFinite(Number(game.impact))) game.impact = Math.round(game.pts + game.reb * 1.2 + game.ast * 1.5 + game.stl * 3 + game.blk * 3);
+    return signatureGameDetails(context, game);
+  }
 
-    const fallbacks = [
-      { tone: "support", source: `${team}球迷`, text: `不是每一季都要成為傳奇；願意把普通的晚上也打完，才有完整的生涯。` },
-      { tone: "story", source: "賽後留言", text: `${year ? `${year} 年` : "今年"}最值得留下的不是一張數據表，而是這一季終於能被一句話講完。` },
-      { tone: "quiet", source: "客場看台", text: `${games || "這些"} 場比賽或許不完美，但至少讓下一季還有值得等待的理由。` },
-      { tone: "support", source: "球隊跟隊記者", text: `如果只看結果會錯過很多東西；平凡球季裡做過的選擇，也會決定下一次站上場時還剩多少人相信他。` },
-    ];
-    const offset = stableStoryIndex(`${key}-fallback`, fallbacks.length);
-    for (let index = 0; rows.length < 3 && index < fallbacks.length; index += 1) {
-      const item = fallbacks[(offset + index) % fallbacks.length];
-      add(item.tone, item.source, item.text);
-    }
-    return rows.slice(0, 3);
+  function seasonTrend(context) {
+    const previous = context.previous;
+    if (!previous) return { value: "首季基準", note: "從這一季開始累積比較" };
+    const metrics = [
+      ["得分", context.pts - Number(previous.pts || 0), "分"],
+      ["助攻", context.ast - Number(previous.ast || 0), "次"],
+      ["籃板", context.reb - Number(previous.reb || 0), "個"],
+      ["時間", context.mins - Number(previous.mins || 0), "分鐘"],
+    ].sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+    const [label, delta, unit] = metrics[0];
+    return { value: `${label} ${delta >= 0 ? "+" : ""}${delta.toFixed(1)}`, note: `較上季每場${delta >= 0 ? "增加" : "減少"} ${Math.abs(delta).toFixed(1)} ${unit}` };
+  }
+
+  function seasonPrimarySkill(context) {
+    return [
+      { value: context.pts, label: "場均得分", text: `${context.pts} 分` },
+      { value: context.ast * 2.2, label: "組織輸出", text: `${context.ast} 助攻` },
+      { value: context.reb * 1.7, label: "籃板影響", text: `${context.reb} 籃板` },
+      { value: (context.stl + context.blk) * 5, label: "防守破壞", text: `${(context.stl + context.blk).toFixed(1)} 抄截＋阻攻` },
+    ].sort((a, b) => b.value - a.value)[0];
+  }
+
+  function seasonRecords(context) {
+    const rows = [];
+    const add = value => { const text = seasonStorySentence(value); if (text && !rows.includes(text)) rows.push(text); };
+    if (context.bestTournament) add(`${context.bestTournament.name}｜${context.bestTournament.finish}`);
+    context.awards.slice(0, 2).forEach(add);
+    if (context.injuryMissed) add(`${context.season.injuryName || "傷病"}｜缺席 ${context.injuryMissed} 場`);
+    if (context.suspensionGames) add(`場外處分｜停賽 ${context.suspensionGames} 場`);
+    if (Number(context.season.seasonFatigueGain || 0) >= 12) add(`高負荷球季｜疲勞 +${context.season.seasonFatigueGain}、身體負荷 +${context.season.seasonBodyLoadGain || 0}`);
+    context.beats.slice(0, 2).forEach(beat => add(seasonStoryMoment(beat.text)));
+    if (!rows.length && context.games === context.scheduledGames && context.games > 0) add(`完整出勤｜${context.games} 場全數出賽`);
+    return rows.slice(0, 4);
   }
 
   function syncSeasonStoryCard() {
@@ -450,10 +485,14 @@
     if ([...special.querySelectorAll(".blSeasonStoryCard")].some((node) => node.dataset.blSeasonStory === marker)) return;
 
     const context = seasonStoryContext(player, season);
-    const headline = buildSeasonHeadline(context);
-    const reactions = buildSeasonFanReactions(context, headline);
+    const signature = seasonSignatureGame(context);
+    const trend = seasonTrend(context);
+    const primary = seasonPrimarySkill(context);
+    const records = seasonRecords(context);
+    const availability = context.scheduledGames ? Math.round(context.games / context.scheduledGames * 100) : 0;
+    const headline = signature ? `${signature.event}・${signature.stage}` : "本季沒有正式出賽紀錄";
     season.storyHeadline = headline;
-    season.fanReactions = reactions;
+    season.fanReactions = [];
 
     const legacyStory = [...special.querySelectorAll(".awards")]
       .find((node) => node.querySelector(".resultSectionTitle")?.textContent.trim() === "本季留下的故事");
@@ -462,7 +501,7 @@
     const card = document.createElement("section");
     card.className = "blSeasonStoryCard";
     card.dataset.blSeasonStory = marker;
-    card.innerHTML = `<div class="blSeasonStoryHead"><div><small>SEASON STORY · ${safeText(context.year || "YEAR")}</small><span>本季一句話</span></div><em>${safeText(season.path || player.path || "CAREER")}</em></div><h3>${safeText(headline)}</h3>${context.beats.length ? `<div class="blSeasonMoments">${context.beats.slice(0, 2).map((beat) => `<span>${safeText(seasonStoryMoment(beat.text))}</span>`).join("")}</div>` : ""}<div class="blSeasonFanHead"><b>球迷即時反應</b><span>這一季在看台上留下的聲音</span></div><div class="blSeasonFanGrid">${reactions.map((reaction) => `<article class="${safeText(reaction.tone)}"><p>「${safeText(reaction.text)}」</p><small>— ${safeText(reaction.source)}</small></article>`).join("")}</div>`;
+    card.innerHTML = `<div class="blSeasonStoryHead"><div><small>SEASON DATA · ${safeText(context.year || "YEAR")}</small><span>本季關鍵表現</span></div><em>${safeText(season.path || player.path || "CAREER")}</em></div><h3>${safeText(headline)}</h3>${signature ? `<div class="blSignatureMatchup"><b>${safeText(context.team)} ${signature.scoreFor}：${signature.scoreAgainst} ${safeText(signature.opponent)}</b><span>${safeText(signature.result)}｜${signature.minutes} 分鐘</span></div><p class="blSignatureStatline">代表戰數據｜${signature.pts} 分・${signature.reb} 籃板・${signature.ast} 助攻・${signature.stl} 抄截・${signature.blk} 阻攻</p>` : ""}<div class="blSeasonDataGrid"><article><small>代表戰得分</small><b>${signature ? `${signature.pts} 分` : "—"}</b><span>${signature ? `${signature.reb} 籃板・${signature.ast} 助攻` : "本季沒有出賽"}</span></article><article><small>出賽率</small><b>${availability}%</b><span>${context.games}／${context.scheduledGames || context.games} 場</span></article><article><small>數據走勢</small><b>${safeText(trend.value)}</b><span>${safeText(trend.note)}</span></article><article><small>${safeText(primary.label)}</small><b>${safeText(primary.text)}</b><span>本季主要貢獻</span></article></div>${records.length ? `<div class="blSeasonRecordHead"><b>特別紀錄</b><span>本季留下的賽事、獎項與生涯轉折</span></div><div class="blSeasonMoments">${records.map(record => `<span>${safeText(record)}</span>`).join("")}</div>` : ""}`;
 
     const tournamentList = special.querySelector(".tourneyList");
     if (tournamentList) tournamentList.insertAdjacentElement("afterend", card);
@@ -471,58 +510,62 @@
 
   function retirementStoryText(player, honors = []) {
     const history = Array.isArray(player.seasonHistory) ? player.seasonHistory.filter(Boolean) : [];
-    const name = String(player.name || "籃球癡漢").trim() || "籃球癡漢";
+    const rawName = String(player.name || "").trim();
+    const name = !rawName || rawName === "無名球員" || rawName === "這名球員" ? "籃球癡漢" : rawName;
     if (!history.length) return `${name} 完成了屬於自己的球員生涯，最後一次走下球場時，留下的不只是一份數據。`;
 
     const first = history[0] || {};
     const last = history[history.length - 1] || {};
-    const teamRows = history.filter((season) => String(season.team || "").trim());
+    const studentPath = (path) => /^(HBL|UBA|UBA 強權|NCAA D1|NCAA D2|日本大學)$/.test(String(path || ""));
+    const college = history.find((season) => season.path !== "HBL" && studentPath(season.path));
+    const proHistory = history.filter((season) => !studentPath(season.path));
+    const firstPro = proHistory[0] || null;
     const teamCounts = new Map();
-    teamRows.forEach((season) => {
-      const team = String(season.team).trim();
-      teamCounts.set(team, (teamCounts.get(team) || 0) + 1);
+    (proHistory.length ? proHistory : history).forEach((season) => {
+      const team = String(season.team || "").trim();
+      if (team) teamCounts.set(team, (teamCounts.get(team) || 0) + 1);
     });
-    const teams = [...teamCounts.keys()];
-    const adultCounts = new Map();
-    teamRows.filter((season) => !/^(HBL|UBA|UBA 強權|NCAA D1|NCAA D2|日本大學)$/.test(String(season.path || ""))).forEach((season) => {
-      const team = String(season.team).trim();
-      adultCounts.set(team, (adultCounts.get(team) || 0) + 1);
-    });
-    const longest = [...(adultCounts.size ? adultCounts : teamCounts).entries()].sort((a, b) => b[1] - a[1])[0] || [];
+    const longest = [...teamCounts.entries()].sort((a, b) => b[1] - a[1])[0] || [];
     const peak = [...history].sort((a, b) => Number(b.ovr || 0) - Number(a.ovr || 0) || Number(b.pts || 0) - Number(a.pts || 0))[0] || last;
     const firstTeam = String(first.team || "高中球場").trim();
     const finalTeam = String(last.team || player.team || "最後一支球隊").trim();
-    const peakTeam = String(peak.team || longest[0] || finalTeam).trim();
-    const peakAge = Number(peak.age || (Number(peak.year || 0) - 2010) || 0);
-    const peakOvr = Number(peak.ovr || player.peakOverall || 0);
-    const seasons = history.length;
+    const sentences = [];
 
-    const opening = `${name}從${firstTeam}出發，${seasons} 個球季一路走過 ${Math.max(1, teams.length)} 支球隊。`;
-    const meaningfulBeat = [...(player.storyBeats || [])]
-      .filter((item) => {
-        const text = String(item?.text || "");
-        const narrativeType = ["event", "life"].includes(String(item?.type || ""));
-        const flagged = item?.chain || item?.worldShift || item?.major || item?.international || item?.offCourt;
-        return text && (narrativeType || flagged) && !/本季獲得|取得.*你繳出|年度第一隊|得分王|籃板王|助攻王/.test(text);
-      })
-      .sort((a, b) => Number(b.importance || 0) - Number(a.importance || 0))[0];
+    let opening = `${name}的球員生涯從${firstTeam}開始`;
+    if (college) opening += `；高中畢業後，他前往${college.path}的${college.team}繼續累積比賽經驗`;
+    if (firstPro) opening += `，並在 ${firstPro.year} 年穿上${firstPro.team}球衣，拿到第一個職業位置`;
+    sentences.push(`${opening}。`);
 
-    let middle = "";
-    if (meaningfulBeat) {
-      const beatText = String(meaningfulBeat.text).trim().replace(/[。；]+$/, "");
-      middle = `${meaningfulBeat.year ? `${meaningfulBeat.year} 年，` : "生涯途中，"}${beatText}；那次轉折，改變了他往後的路。`;
+    const failedDraft = (Array.isArray(player.collegeDraftHistory) ? player.collegeDraftHistory : [])
+      .find((attempt) => Array.isArray(attempt?.results) && attempt.results.length && attempt.results.every((result) => !result.success));
+    const injuries = (Array.isArray(player.injuryHistory) ? player.injuryHistory : [])
+      .filter(Boolean).sort((a, b) => Number(b.missedGames || 0) - Number(a.missedGames || 0));
+    if (failedDraft) {
+      const markets = failedDraft.results.map((result) => result.label || result.league).filter(Boolean).join("、");
+      const returned = history.some((season) => Number(season.year || 0) > Number(failedDraft.year || 0) && studentPath(season.path));
+      const gradeLabel = ["", "一", "二", "三", "四"][Number(failedDraft.grade || 0)] || "學";
+      let turn = `${failedDraft.year} 年大${gradeLabel}球季結束，他挑戰${markets || "新人市場"}，卻沒有拿到球隊名額`;
+      if (returned) turn += "；他選擇回到校園，把落選變成下一季的準備";
+      else if (firstPro && Number(firstPro.year || 0) > Number(failedDraft.year || 0)) turn += `，直到 ${firstPro.year} 年才由${firstPro.team}打開職業入口`;
+      sentences.push(`${turn}。`);
+    } else if (injuries.length) {
+      const injury = injuries[0];
+      sentences.push(`${injury.year ? `${injury.year} 年` : "生涯途中"}，${injury.name || injury.area || "一次傷勢"}迫使他缺席 ${Number(injury.missedGames || 0)} 場；那段復健期成了他重新調整打法與身體的轉折。`);
     } else if (longest[0] && longest[1] >= 2) {
-      middle = `生涯最長的 ${longest[1]} 年留在${longest[0]}，${peakAge ? `${peakAge} 歲` : "巔峰時"}效力${peakTeam}時攀上 OVR ${peakOvr}。`;
-    } else {
-      middle = `${peakAge ? `${peakAge} 歲` : "巔峰時"}效力${peakTeam}時，他把能力推到 OVR ${peakOvr}，終於在輪替與競爭中站穩自己的位置。`;
+      sentences.push(`他把生涯最長的 ${longest[1]} 個球季留在${longest[0]}，從爭取輪替一路打成球隊熟悉的面孔。`);
     }
 
-    const topHonor = String(honors[0] || "");
-    if (!meaningfulBeat && topHonor) {
-      const counted = topHonor.match(/^(.*) ×(\d+)$/);
-      if (counted && /明星賽/.test(counted[1])) middle = middle.replace(/。$/, `，並 ${counted[2]} 度入選${counted[1]}。`);
-      else if (counted && /年度第一隊/.test(counted[1])) middle = middle.replace(/。$/, `，也 ${counted[2]} 度站上年度第一隊。`);
-      else if (Number(player.championships || 0) > 0) middle = middle.replace(/。$/, `，並帶走 ${Number(player.championships)} 座主要冠軍。`);
+    const signatureRows = history.map((season) => {
+      const context = seasonStoryContext(player, season);
+      return { season, game: seasonSignatureGame(context) };
+    }).filter((row) => row.game).sort((a, b) => Number(b.game.impact || 0) - Number(a.game.impact || 0));
+    const signature = signatureRows[0];
+    if (signature) {
+      const game = signature.game, season = signature.season;
+      const outcome = game.result === "勝" ? `以 ${game.scoreFor}：${game.scoreAgainst} 擊敗${game.opponent}` : `以 ${game.scoreFor}：${game.scoreAgainst} 不敵${game.opponent}`;
+      sentences.push(`${season.year} 年的${game.event}${game.stage}，${season.team}${outcome}；他在 ${game.minutes} 分鐘內拿下 ${game.pts} 分、${game.reb} 籃板與 ${game.ast} 助攻，留下生涯最具代表性的一戰。`);
+    } else {
+      sentences.push(`${peak.year || "巔峰球季"}年效力${peak.team || finalTeam}時，他繳出場均 ${Number(peak.pts || 0).toFixed(1)} 分、${Number(peak.reb || 0).toFixed(1)} 籃板與 ${Number(peak.ast || 0).toFixed(1)} 助攻。`);
     }
 
     const age = Number(player.age || last.age || 0);
@@ -532,7 +575,10 @@
     else if (/大傷|重傷|傷勢|醫療|手術/.test(reason)) ending = `${age ? `${age} 歲那年` : "最後"}，傷勢替他在${finalTeam}的最後一章畫下句點。`;
     else if (player.hallOfFame?.length || player.jerseyRetired?.length) ending = `${age ? `${age} 歲那年` : "最後"}，他在${finalTeam}告別球場；掌聲散去後，名字仍留在球館裡。`;
 
-    return `${opening}${middle}${ending}`;
+    const topHonor = String(honors[0] || "");
+    if (topHonor) ending = ending.replace(/。$/, `；回頭看這段路，${topHonor}是最醒目的生涯註腳。`);
+    sentences.push(ending);
+    return sentences.join("");
   }
 
   function retirementPublicProfile(player) {

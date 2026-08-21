@@ -1,5 +1,3 @@
-function leaderboardReturnPatchScript() {
-  return String.raw`<script id="bl-leaderboard-return-patch">
 (() => {
   const CLIENT_CACHE_TTL = 5 * 60 * 1000;
   const CLIENT_CACHE_PREFIX = "bl_http_cache_v1:";
@@ -19,7 +17,6 @@ function leaderboardReturnPatchScript() {
 
   function cachePolicy(url) {
     if (url.origin !== location.origin) return null;
-    if (url.pathname === "/api/careers") return { persist: true };
     if (url.pathname === "/api/news") return { persist: true };
     if (/^\/api\/careers\/[^/]+$/.test(url.pathname)) return null;
     return null;
@@ -215,32 +212,3 @@ function leaderboardReturnPatchScript() {
     }, 50);
   }
 })();
-</script>`;
-}
-
-export async function onRequest(context) {
-  const response = await context.next();
-  if (context.request.method !== "GET") return response;
-
-  const contentType = response.headers.get("content-type") || "";
-  if (!response.ok || !contentType.includes("text/html")) return response;
-
-  const html = await response.text();
-  if (html.includes("bl-leaderboard-return-patch")) {
-    const headers = new Headers(response.headers);
-    headers.delete("content-length");
-    return new Response(html, { status: response.status, statusText: response.statusText, headers });
-  }
-
-  const patch = leaderboardReturnPatchScript();
-  const output = html.includes("</body>") ? html.replace("</body>", patch + "</body>") : html + patch;
-  const headers = new Headers(response.headers);
-  headers.delete("content-length");
-  headers.set("cache-control", "no-cache");
-
-  return new Response(output, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
-}

@@ -1,0 +1,1001 @@
+/* Career feed, training and season layout. Keep stylesheet load order unchanged. */
+/* ===== Consolidated source block 4 ===== */
+/* =========================================================
+   V7.25 SINGLE-COLUMN CAREER FEED
+   Original basketball-court UI, simplified into a focused
+   career timeline. No permanent side panels.
+   ========================================================= */
+
+body{
+  background:
+    radial-gradient(circle at 50% -5%,rgba(223,119,54,.10),transparent 28%),
+    linear-gradient(180deg,#090d12 0%,#080b0f 100%);
+}
+
+.wrap{
+  max-width:780px;
+  margin:auto;
+  padding:12px 14px 36px;
+}
+
+.brand{
+  margin:0 0 8px;
+  font-size:22px;
+  letter-spacing:-.5px;
+}
+
+/* --- compact player dashboard --- */
+.header{
+  display:grid;
+  grid-template-columns:1.6fr 1fr 1fr 1fr 1.15fr;
+  gap:5px;
+  margin:0;
+  padding:10px;
+  border:1px solid #3b4b58;
+  border-bottom-color:#8b613d;
+  border-radius:13px 13px 0 0;
+  background:
+    linear-gradient(180deg,rgba(20,31,42,.98),rgba(13,22,30,.98)),
+    repeating-linear-gradient(90deg,rgba(215,145,73,.03) 0 58px,transparent 58px 60px);
+}
+.header .box{
+  min-width:0;
+  padding:7px 8px;
+  border-radius:9px;
+  border:1px solid #304350;
+  background:#0d1720;
+  box-shadow:none;
+}
+.header .box small{
+  font-size:8px;
+  letter-spacing:.6px;
+}
+.header .box b{
+  font-size:13px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.header .who{
+  grid-column:auto;
+}
+.header .who small{display:none}
+.header .who b{
+  font-size:15px;
+}
+.teamname{
+  display:block;
+  margin:3px 0 0;
+  font-size:10px;
+  color:#e8a45d;
+}
+
+.proTopStrip{
+  margin:0!important;
+  padding:6px 10px!important;
+  border-left:1px solid #3b4b58;
+  border-right:1px solid #3b4b58;
+  border-bottom:1px solid #33434e;
+  background:#0d151d;
+}
+.proTopItem{
+  padding:3px 8px!important;
+}
+.proTopItem small{font-size:8px!important}
+.proTopItem b{font-size:10px!important}
+
+/* --- phase strip: understated --- */
+.flow{
+  margin:0;
+  padding:7px 10px;
+  gap:4px;
+  flex-wrap:nowrap;
+  border-left:1px solid #3b4b58;
+  border-right:1px solid #3b4b58;
+  border-bottom:1px solid #3b4b58;
+  background:#0c131a;
+  overflow-x:auto;
+}
+.flow span{
+  flex:1;
+  min-width:max-content;
+  text-align:center;
+  font-size:8.5px;
+  padding:4px 5px;
+  border-radius:999px;
+  background:transparent;
+  border-color:#26343e;
+}
+.flow span.on{
+  color:#1c120b;
+  background:#dc9149;
+  border-color:#dc9149;
+}
+
+.titleShelf{
+  margin:6px 0!important;
+  gap:4px!important;
+  min-height:0;
+}
+.titleBadge,.mentalBadge{
+  font-size:8.5px!important;
+  padding:3px 6px!important;
+}
+
+/* --- career feed --- */
+.layout{
+  display:block;
+}
+
+.story.card{
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  overflow:visible;
+}
+
+.chapter{
+  margin:12px 0 5px;
+  text-align:center;
+  color:#7ea7cc;
+  font-size:9px;
+  letter-spacing:3px;
+}
+
+.story h2{
+  display:none;
+}
+
+/* Current narrative is the "birth / chapter" card */
+.text{
+  margin:0 0 7px;
+  padding:11px 13px;
+  border:1px solid #3b5364;
+  border-left:3px solid #7da6c8;
+  border-radius:11px;
+  background:#101c26;
+  font-size:12px;
+  line-height:1.55;
+}
+
+/* Every generated section becomes a feed card */
+#special{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+#special > *{
+  margin-top:0!important;
+}
+#special > .notice,
+#special > .eventResult,
+#special > .outcome,
+#special > .healthok,
+#special > .injury,
+#special > .bodyWarning,
+#special > .specialStage,
+#special > .chapterCard,
+#special > .pointbox,
+#special > .dicewrap,
+#special > .tourneyList,
+#special > .contractDecision,
+#special > .offerGrid,
+#special > .careerMarket,
+#special > .legacyPage{
+  border-radius:11px;
+}
+
+/* event / report cards */
+.notice,.eventResult,.outcome,.healthok,.injury,.bodyWarning,.specialStage,
+.chapterCard,.seasonStatLine,.awards,.breakdown,.report,.contractDecision{
+  padding:10px 12px!important;
+  font-size:11.5px;
+  line-height:1.5!important;
+}
+
+.chapterCard{
+  margin:0!important;
+}
+
+.reportGrid{
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+  margin-top:6px;
+}
+.report{
+  min-width:0;
+  padding:7px 8px!important;
+}
+.report small{font-size:8px}
+.report b{font-size:14px}
+
+.tourneyList{
+  gap:4px;
+  margin:0!important;
+}
+.tourney{
+  padding:8px 10px;
+  border-radius:9px;
+  font-size:11px;
+}
+.tourney .name{font-size:11px}
+.tourney .finish,.tourney .reward{font-size:10px}
+
+.seasonStatLine{
+  margin-top:5px!important;
+  padding:8px 10px!important;
+  font-size:10.5px!important;
+}
+
+.awards,.breakdown{
+  margin-top:5px!important;
+  font-size:10.5px;
+}
+
+/* --- decision zone --- */
+.choices{
+  position:relative;
+  margin-top:10px;
+  padding:12px 10px 10px;
+  gap:6px;
+  border-top:1px solid #425869;
+  background:linear-gradient(180deg,rgba(17,28,37,.92),rgba(12,20,27,.98));
+  border-radius:0 0 12px 12px;
+}
+.choices:before{
+  content:"決策";
+  position:absolute;
+  top:-9px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:2px 9px;
+  border:1px solid #425869;
+  border-radius:999px;
+  background:#0d151d;
+  color:#8ea6b9;
+  font-size:8px;
+  letter-spacing:1px;
+}
+.choice{
+  padding:10px 12px;
+  border-radius:9px;
+  background:#162533;
+  border-color:#3b5264;
+}
+.choice b{
+  font-size:13px;
+  margin-bottom:2px;
+}
+.choice small{
+  font-size:9.5px;
+  line-height:1.35;
+}
+.choice:hover{
+  border-color:#d58d49;
+  transform:none;
+}
+
+.next{
+  margin-top:8px;
+  padding:10px;
+  border-radius:9px;
+  font-size:12px;
+}
+
+/* --- training compact --- */
+.dicewrap{
+  padding:10px!important;
+}
+.dicepool{
+  margin:7px 0;
+  gap:6px;
+}
+.die{
+  width:43px;
+  height:43px;
+  border-radius:9px;
+  font-size:18px;
+}
+.assign{
+  grid-template-columns:repeat(4,1fr);
+  gap:4px;
+}
+.assign button{
+  padding:6px 3px;
+  font-size:9px;
+}
+
+.trainingStats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:3px 12px;
+  margin-top:7px;
+}
+.trainingStats .stat{
+  margin:2px 0;
+}
+.trainingStats .sl{
+  font-size:9.5px;
+}
+.abilityHelpCard{cursor:help;outline:none}.abilityHelpCard:focus-visible,.abilityHelpCard.helpOpen{border-color:#f4a24b!important;box-shadow:0 0 0 2px #f4a24b22}.abilityHelpMark{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:3px;border:1px solid #5b788b;border-radius:50%;color:#9ab1c0;font-size:9px}.abilityHelpPopover{position:fixed;z-index:1200;width:min(300px,calc(100vw - 24px));padding:11px 12px;border:1px solid #5b7484;border-radius:10px;background:#071118f5;color:#c6d7e0;box-shadow:0 12px 34px #000a;pointer-events:none}.abilityHelpPopover[hidden]{display:none}.abilityHelpPopover b{display:block;margin-bottom:4px;color:#f0a45a;font-size:12px}.abilityHelpPopover span{display:block;font-size:11px;line-height:1.55}
+.draftRegistration{margin-top:14px}.draftSelectionHead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;color:#9fb4c2;font-size:12px}.draftSelectionHead b{color:#f4a24b}.draftRouteGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.draftRouteChoice{appearance:none;text-align:left;border:1px solid #314b5c;border-radius:12px;background:#0b1821;color:#dce8ef;padding:13px;display:flex;flex-direction:column;gap:6px;cursor:pointer}.draftRouteChoice:hover{border-color:#f4a24b}.draftRouteChoice.selected{border-color:#ff9c3d;background:#241b14;box-shadow:inset 3px 0 #ff9c3d}.draftRouteChoice.locked{opacity:.5;cursor:not-allowed}.draftRouteTop{display:flex;justify-content:space-between;gap:8px;align-items:center}.draftRouteTop strong{color:#f5a44e}.draftRouteChoice small,.draftRouteChoice>span:last-child{color:#91a9b8;font-size:11px;line-height:1.45}.draftScoutingSummary{display:grid;gap:5px;margin:14px 0;padding:15px;border:1px solid #80552e;border-left:4px solid #ee9848;border-radius:12px;background:linear-gradient(135deg,#21170f,#0c171e)}.draftScoutingSummary small{color:#ed9a51;font-size:9px;font-weight:950;letter-spacing:.13em}.draftScoutingSummary b{color:#f4ece5;font-size:16px}.draftScoutingSummary p{margin:0;color:#a9bac4;font-size:11px;line-height:1.65}.draftResultList{display:grid;gap:8px;margin:13px 0}.draftResultRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;padding:12px 13px;border:1px solid #304959;border-radius:10px;background:#0b1720}.draftResultRow div{display:grid;gap:2px}.draftResultRow small{color:#718996;font-size:9px}.draftResultRow span{align-self:center;color:#9eb2bf;font-size:11px}.draftResultRow p{grid-column:1/-1;margin:4px 0 0;padding-top:7px;border-top:1px solid #263b48;color:#aabac3;font-size:10.5px;line-height:1.6}.draftResultRow.pass{border-color:#3a7659}.draftResultRow.pass b{color:#71d69b}.draftResultRow.fail b{color:#dd8e8e}
+@media(max-width:700px){.draftRouteGrid{grid-template-columns:1fr}.draftSelectionHead{align-items:flex-start;flex-direction:column;gap:3px}.draftResultRow{grid-template-columns:1fr}.draftResultRow p{grid-column:1}}
+.trainingStats .track{
+  height:5px;
+}
+
+/* --- ability point board --- */
+.pointbox{
+  margin-top:0!important;
+  padding:9px!important;
+}
+.pointHead{
+  margin-bottom:6px;
+  padding-bottom:6px;
+}
+.points{font-size:21px}
+.pointFinish{
+  padding:7px 10px;
+  font-size:10px;
+}
+#pointRows{
+  gap:4px;
+}
+.pointrow{
+  min-height:51px;
+  padding:6px 8px;
+}
+.pointrow .pointName b{font-size:11px}
+.pointrow .pointValue{font-size:9.5px}
+.pointrow small{font-size:8.5px}
+
+/* --- career log: collapsible drawer --- */
+.layout > .card:last-child{
+  position:static;
+  max-height:none;
+  margin-top:9px;
+  padding:0;
+  border-radius:10px;
+  background:#0c141b;
+  border:1px solid #2c3d49;
+  overflow:hidden;
+}
+.layout > .card:last-child .section{
+  margin:0;
+  padding:8px 10px;
+  cursor:pointer;
+  font-size:10px;
+  color:#9cafbd;
+}
+.layout > .card:last-child .section:after{
+  content:"　▾";
+  color:#d58d49;
+}
+.layout > .card:last-child #injurySummary,
+.layout > .card:last-child #log{
+  display:none;
+}
+.layout > .card:last-child.open #injurySummary,
+.layout > .card:last-child.open #log{
+  display:block;
+}
+.layout > .card:last-child.open #injurySummary{
+  padding:0 10px;
+}
+.layout > .card:last-child.open #log{
+  height:135px;
+  max-height:135px;
+  padding:0 10px 10px;
+}
+
+/* --- contracts --- */
+.offerGrid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:6px!important;
+}
+.offerCard,.contractCard{
+  padding:10px!important;
+  border-radius:10px!important;
+}
+.offerMeta{
+  gap:4px!important;
+}
+.offerMeta span{
+  padding:4px 6px!important;
+  font-size:8.5px!important;
+}
+
+/* --- legacy pages retain detail, but narrower & cleaner --- */
+.legacyPage{
+  margin-top:0;
+  padding:16px;
+}
+.legacyName{font-size:29px}
+.legacySection{margin-top:11px;padding-top:10px}
+.legacySectionTitle{font-size:12px}
+.legacyNarrative{font-size:11px;padding:10px 11px}
+.legacyTable{font-size:9px}
+
+/* mobile */
+@media(max-width:620px){
+  .wrap{padding:4px 0 24px}
+  .brand{display:none}
+  .header{
+    grid-template-columns:1.5fr repeat(4,1fr);
+    border-radius:0;
+    border-left:0;
+    border-right:0;
+  }
+  .header .box{padding:6px 5px}
+  .header .who b{font-size:13px}
+  .header .box b{font-size:12px}
+  .flow{
+    border-left:0;
+    border-right:0;
+  }
+  .titleShelf{
+    padding:0 10px;
+  }
+  .story.card{
+    padding:0 10px;
+  }
+  .text{font-size:11.5px}
+  #pointRows{grid-template-columns:1fr}
+  .trainingStats{grid-template-columns:1fr}
+  .assign{grid-template-columns:repeat(2,1fr)}
+  .reportGrid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ===== Consolidated source block 5 ===== */
+/* =========================================================
+   V7.26 READABLE CAREER TIMELINE
+   Larger typography + current-year full cards + old-year rows
+   ========================================================= */
+.wrap{max-width:790px;padding:10px 14px 34px}
+.brand{font-size:24px;margin-bottom:10px}
+
+/* Header: readable, not micro text */
+.header{padding:10px;gap:6px}
+.header .box{padding:8px 9px}
+.header .box small{font-size:10px;line-height:1.2}
+.header .box b{font-size:16px;line-height:1.2}
+.header .who b{font-size:17px}
+.teamname{font-size:12px;margin-top:3px}
+.proTopItem small{font-size:9.5px!important}
+.proTopItem b{font-size:11.5px!important}
+.flow span{font-size:10.5px;padding:5px 7px}
+.titleBadge,.mentalBadge{font-size:10px!important;padding:4px 7px!important}
+
+/* Timeline */
+.feedHistory{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+.feedCard{
+  position:relative;
+  margin:0 0 2px;
+  padding:12px 14px;
+  border:1px solid #3c5363;
+  border-radius:11px;
+  background:linear-gradient(180deg,#11202b,#0f1b24);
+  font-size:14px;
+  line-height:1.55;
+}
+.feedBirth{
+  margin-top:8px;
+  border-color:#466275;
+  border-left:3px solid #7da9ca;
+}
+.feedKicker{
+  margin-bottom:6px;
+  color:#9db5c6;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.4px;
+}
+.feed-events .feedKicker{color:#86c99c}
+.feed-training .feedKicker,
+.feed-results .feedKicker{color:#e3a15c}
+.feed-special .feedKicker{color:#d6a0c5}
+.feed-health .feedKicker{color:#86b7d7}
+.feedTitle,.feedLead{
+  font-size:14.5px;
+  font-weight:750;
+  color:#f3eee5;
+}
+.feedBody{
+  font-size:13.5px;
+  line-height:1.55;
+}
+.feedBody .chapterCard{
+  margin-top:6px!important;
+  padding:10px!important;
+}
+.feedBody .chapterEyebrow,.feedBody .chapterMeta{display:none}
+.feedBody .chapterHero{font-size:14px!important;line-height:1.5!important}
+.feedBody .chapterYear{font-size:11px!important}
+.feedSimple{
+  color:#f0ebe2;
+  font-size:14px;
+}
+.feedYearLine{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:7px 0;
+  color:#8fb8aa;
+  font-size:11.5px;
+  font-weight:800;
+  letter-spacing:3px;
+}
+.feedYearLine.current{color:#d49a5b}
+
+/* Current screen */
+.chapter{
+  margin:10px 0 5px;
+  font-size:11.5px;
+  letter-spacing:2.5px;
+}
+.story h2{
+  display:block;
+  margin:6px 0;
+  color:#eda35b;
+  font-size:15px;
+  font-weight:900;
+}
+.text{
+  margin-bottom:6px;
+  padding:11px 13px;
+  font-size:14px;
+  line-height:1.58;
+}
+
+/* Cards and result text */
+.notice,.eventResult,.outcome,.healthok,.injury,.bodyWarning,.specialStage,
+.chapterCard,.seasonStatLine,.awards,.breakdown,.report,.contractDecision,
+.medicalPanel,.injuryCard{
+  font-size:13px!important;
+  line-height:1.55!important;
+}
+.outcomeHead b{font-size:14px}
+.outcomeHead .mut{font-size:11.5px}
+.change{font-size:11.5px}
+.mut{line-height:1.5}
+
+.choice{padding:11px 13px}
+.choice b{font-size:15px}
+.choice small{font-size:12px;line-height:1.4}
+.strategyTag{font-size:10.5px!important}
+.next{font-size:14px;padding:11px}
+
+/* Training */
+.dicewrap{font-size:13px}
+.dicewrap .mut{font-size:12px!important}
+.die{width:46px;height:46px;font-size:20px}
+.assign button{font-size:11px;padding:7px 4px}
+.trainingStats .sl{font-size:11px}
+
+/* Results */
+.tourney{font-size:13px;padding:9px 11px}
+.tourney .name{font-size:13px}
+.tourney .finish,.tourney .reward{font-size:12px}
+.seasonStatLine{font-size:12.5px!important}
+.awards,.breakdown{font-size:12.5px!important}
+
+/* Ability points */
+.pointBalance span:first-child{font-size:12px}
+.points{font-size:23px}
+.pointFinish{font-size:11.5px}
+.pointrow{min-height:56px}
+.pointrow .pointName b{font-size:13px}
+.pointrow .pointValue{font-size:11.5px}
+.pointrow small{font-size:10.5px;line-height:1.35}
+.rolloverNote{font-size:11px!important}
+
+/* Career record drawer */
+.layout > .card:last-child .section{font-size:11.5px}
+.layout > .card:last-child #injurySummary{font-size:11px!important}
+.log{font-size:11px;line-height:1.6}
+
+@media(max-width:620px){
+  .header .box small{font-size:9px}
+  .header .box b{font-size:14px}
+  .header .who b{font-size:15px}
+  .feedCard{padding:11px 12px;font-size:13.5px}
+  .feedKicker{font-size:11px}
+  .feedTitle,.feedLead{font-size:14px}
+  .feedBody{font-size:13px}
+  .text{font-size:13.5px}
+  .choice b{font-size:14.5px}
+  .choice small{font-size:11.5px}
+}
+
+/* ===== Consolidated source block 6 ===== */
+/* =========================================================
+   V7.27 VIEWPORT BUDGET
+   Timeline history can never grow enough to push gameplay
+   far below a 1080p desktop viewport.
+   ========================================================= */
+#game{
+  position:relative;
+}
+.header{
+  position:sticky;
+  top:0;
+  z-index:40;
+  box-shadow:0 7px 22px rgba(0,0,0,.28);
+}
+.proTopStrip{
+  position:sticky;
+  top:64px;
+  z-index:39;
+}
+.feedHistory{
+  max-height:350px;
+  overflow:hidden;
+}
+.feedYearLine{
+  margin:5px 0;
+  font-size:11px;
+}
+.feedOlder{
+  color:#718a94;
+}
+.feedCard{
+  padding:10px 12px;
+}
+.feedBody{
+  font-size:13px;
+}
+.story h2{
+  font-size:16px;
+}
+.text{
+  font-size:13.5px;
+  line-height:1.5;
+  padding:9px 12px;
+}
+.choices{
+  margin-top:8px;
+  padding-top:11px;
+}
+.choice{
+  padding:9px 12px;
+}
+.choice b{font-size:14px}
+.choice small{font-size:11.5px}
+.next{padding:10px;font-size:13px}
+.layout > .card:last-child{
+  margin-top:6px;
+}
+@media(min-width:900px) and (min-height:900px){
+  .wrap{padding-top:8px}
+  .feedHistory{max-height:320px}
+}
+
+/* ===== Consolidated source block 7 ===== */
+/* =========================================================
+   V7.28 CLICKABLE HISTORY + FIXED DECISION DOCK
+   ========================================================= */
+
+/* Timeline rows are real buttons now */
+.feedYearLine{
+  width:100%;
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+}
+.feedYearLine:hover{
+  color:#e2a15e;
+}
+.feedYearLine.open{
+  color:#e6aa69;
+}
+.feedYearDrawer{
+  max-height:270px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  margin:4px 0 8px;
+  padding:5px;
+  border:1px solid #344b5d;
+  border-radius:10px;
+  background:#0b141b;
+}
+.feedArchiveCard{
+  margin-bottom:5px;
+  padding:9px 10px;
+  border:1px solid #304654;
+  border-radius:9px;
+  background:#101d27;
+  font-size:12px;
+  line-height:1.45;
+}
+.feedArchiveCard:last-child{margin-bottom:0}
+.feedArchiveText{
+  margin-bottom:5px;
+  color:#e7e1d8;
+}
+.feedEmpty{
+  padding:10px;
+  color:#8f9da8;
+  text-align:center;
+  font-size:11px;
+}
+.feedOlderList{
+  margin:0 0 7px;
+  padding:5px 8px;
+  border-left:2px solid #4c6575;
+  background:#0b1218;
+}
+.feedHistory.hasOpenYear{
+  max-height:365px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+
+/* The timeline itself IS the career record. */
+.layout{
+  display:block;
+}
+
+/* Fixed bottom choices like the reference UI. */
+.choices:not(:empty){
+  position:fixed!important;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  z-index:120;
+  width:min(760px,calc(100vw - 20px));
+  max-height:38vh;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  margin:0!important;
+  padding:20px 12px 12px!important;
+  border:1px solid #455c6d;
+  border-bottom:0;
+  border-radius:14px 14px 0 0;
+  background:
+    linear-gradient(180deg,rgba(19,31,41,.98),rgba(10,17,23,.995));
+  box-shadow:0 -14px 38px rgba(0,0,0,.55);
+  backdrop-filter:blur(9px);
+}
+.choices:not(:empty):before{
+  content:"決策";
+  top:5px;
+  background:transparent;
+  border:0;
+  color:#92a9ba;
+}
+.choices:not(:empty) .choice{
+  flex:0 0 auto;
+}
+
+/* NEXT uses the same dock position when no choices are active. */
+#next:not(.hidden){
+  position:fixed!important;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  z-index:121;
+  width:min(760px,calc(100vw - 20px));
+  margin:0!important;
+  padding:13px 14px!important;
+  border-radius:12px 12px 0 0!important;
+  box-shadow:0 -10px 30px rgba(0,0,0,.45);
+}
+
+/* Reserve space only when a bottom control is actually present. */
+#game.hasChoices .story{
+  padding-bottom:min(41vh,360px)!important;
+}
+#game.hasNext .story{
+  padding-bottom:68px!important;
+}
+
+/* While making a decision, reduce old timeline footprint further. */
+#game.hasChoices .feedHistory{
+  max-height:210px;
+}
+#game.hasNext .feedHistory{
+  max-height:245px;
+}
+
+/* Remove obsolete career-record drawer styling effects */
+.layout > .card:last-child{display:block!important}
+
+@media(max-width:620px){
+  .choices:not(:empty),
+  #next:not(.hidden){
+    width:100%;
+    border-left:0;
+    border-right:0;
+    border-radius:12px 12px 0 0!important;
+  }
+  .choices:not(:empty){
+    max-height:43vh;
+  }
+  #game.hasChoices .story{
+    padding-bottom:min(46vh,390px)!important;
+  }
+}
+
+/* ===== Consolidated source block 8 ===== */
+/* =========================================================
+   V7.29 SINGLE-COLUMN TRAINING / POINT ALLOCATION
+   恢復參考圖那種「一條一條往下看」的操作節奏，
+   但列高壓縮，仍以 1920×1080 單頁操作為目標。
+   ========================================================= */
+
+/* 季初特訓：8項能力改回單欄 */
+.trainingStats{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:4px!important;
+  margin-top:8px!important;
+}
+.trainingStats .stat{
+  display:grid!important;
+  grid-template-columns:74px minmax(0,1fr) 76px!important;
+  align-items:center!important;
+  gap:9px!important;
+  margin:0!important;
+  min-height:38px!important;
+  padding:6px 9px!important;
+  border:1px solid #304755!important;
+  border-radius:8px!important;
+  background:#101d27!important;
+}
+.trainingStats .sl{
+  display:contents!important;
+}
+.trainingStats .sl b{
+  font-size:13px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+.trainingStats .sl > span{
+  grid-column:3!important;
+  grid-row:1!important;
+  justify-self:end!important;
+  color:#d7e0e6!important;
+  font-size:11.5px!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+.trainingStats .track{
+  grid-column:2!important;
+  grid-row:1!important;
+  height:7px!important;
+  margin:0!important;
+  border-radius:99px!important;
+}
+.trainingStats .fill{
+  height:100%!important;
+}
+
+/* 骰子區也稍微收斂，避免單欄能力列把頁面撐過1080 */
+.dicewrap{
+  padding:9px 10px!important;
+}
+.dicepool{
+  margin:6px 0!important;
+}
+.die{
+  width:42px!important;
+  height:42px!important;
+  font-size:18px!important;
+}
+.assign{
+  grid-template-columns:repeat(4,1fr)!important;
+  gap:4px!important;
+}
+.assign button{
+  padding:6px 3px!important;
+  font-size:10.5px!important;
+}
+
+/* 賽季能力點：8項改回單欄 */
+#pointRows{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:4px!important;
+}
+.pointbox{
+  max-width:none!important;
+}
+.pointrow{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 34px!important;
+  align-items:center!important;
+  gap:9px!important;
+  min-height:45px!important;
+  padding:6px 9px!important;
+  border:1px solid #304755!important;
+  border-radius:8px!important;
+  background:#101d27!important;
+}
+.pointrow > div{
+  display:grid!important;
+  grid-template-columns:145px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+.pointrow .pointName{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:6px!important;
+  flex-wrap:nowrap!important;
+  min-width:0!important;
+}
+.pointrow .pointName b{
+  font-size:13px!important;
+  white-space:nowrap!important;
+}
+.pointrow .pointValue{
+  font-size:11.5px!important;
+  white-space:nowrap!important;
+}
+.pointrow small{
+  margin:0!important;
+  font-size:10.5px!important;
+  line-height:1.25!important;
+  color:#94a5b2!important;
+  text-align:left!important;
+}
+.pointrow button{
+  width:34px!important;
+  height:34px!important;
+  font-size:16px!important;
+  flex:none!important;
+}
+.pointHead{
+  position:sticky!important;
+  top:72px!important;
+  z-index:25!important;
+  padding:7px 8px!important;
+  margin:-2px -2px 6px!important;
+  border:1px solid #394f60!important;
+  border-radius:9px!important;
+  background:rgba(13,22,30,.97)!important;
+  backdrop-filter:blur(7px)!important;
+}
+.pointFinish{
+  padding:7px 10px!important;
+}
+
+/* 在一般1080p桌面進一步壓縮 */
+@media(min-width:900px) and (max-height:1100px){
+  .trainingStats .stat{
+    min-height:35px!important;
+    padding:5px 8px!important;
+  }
+  .pointrow{
+    min-height:42px!important;
+    padding:5px 8px!important;
+  }
+  .pointrow small{
+    font-size:10px!important;
+  }
+}
+
+/* 手機仍保持單欄，但不硬塞三欄內容 */
+@media(max-width:620px){
+  .trainingStats .stat{
+    grid-template-columns:62px minmax(0,1fr) 65px!important;
+    gap:6px!important;
+  }
+  .pointrow > div{
+    grid-template-columns:125px minmax(0,1fr)!important;
+    gap:5px!important;
+  }
+  .pointrow small{
+    font-size:9.5px!important;
+  }
+}

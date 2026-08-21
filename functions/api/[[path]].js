@@ -48,7 +48,7 @@ function hydrate(row,summary=false){
 function validateCareer(input){
   const data=input?.career_data||{},integrity=data.integrity||{},seasons=Array.isArray(input?.season_history)?input.season_history:[];
   if(!/^[0-9a-f-]{36}$/i.test(text(input?.id,80)))return "公開生涯 ID 格式錯誤";
-  if(data.ranking_era!=="v8"||data.publisher_version!=="8.0.0")return "只接受 BasketballLife V8 生涯";
+  if(data.ranking_era!=="v81"||data.publisher_version!=="8.1.0")return "V8.1 現役榜只接受 BasketballLife V8.1 生涯";
   if(integrity.schema!=="v8-core-1"||integrity.verdict!=="passed")return "生涯完整性封套錯誤";
   if(number(input.retired_age)>60||number(input.retired_age)<16||number(input.peak_overall)>99)return "生涯數值超出合理範圍";
   if(number(input.final_year)-number(input.retired_age)!==2010)return "年份與退休年齡不一致";
@@ -95,13 +95,28 @@ async function careers(request,env,path){
     return row?json(hydrate(row)):fail("找不到這筆公開生涯",404);
   }
   if(request.method==="GET"){
-    const url=new URL(request.url),era=["v8","v7","weekly"].includes(url.searchParams.get("era"))?url.searchParams.get("era"):"v8";
+    const url=new URL(request.url),era=["v81","v8","v7","weekly"].includes(url.searchParams.get("era"))?url.searchParams.get("era"):"v81";
     const metric=orderColumn[url.searchParams.get("metric")]?url.searchParams.get("metric"):"power",weeklyId=text(url.searchParams.get("weekly_id"),30);
-    if(url.searchParams.get("archive")==="1"){
-      const rows=(await env.DB.prepare(`SELECT ${summaryColumns} FROM career_records WHERE is_public=1 AND ranking_era='v8' AND weekly_active=1 AND weekly_id<>? ORDER BY ${orderColumn[metric]} DESC,career_rating DESC LIMIT 150`).bind(weeklyId).all()).results.map(x=>hydrate(x,true));
+    if(url.searchParams.get("mine")==="1"){
+      const auth=await authenticate(request,env);if(auth.error)return auth.error;
+      const rows=(await env.DB.prepare(`SELECT ${summaryColumns} FROM career_records WHERE is_public=1 AND user_id=? ORDER BY updated_at DESC LIMIT 80`).bind(auth.profile.user_id).all()).results.map(x=>hydrate(x,true));
       return json({rows});
     }
-    const clause=era==="v7"?"ranking_era='v750'":era==="weekly"?"ranking_era='v8' AND weekly_active=1 AND weekly_id=?":"ranking_era='v8' AND weekly_active=0";
+    if(url.searchParams.get("champions")==="1"){
+      const championEra=era==="v7"?"v750":era==="v8"?"v8":"";
+      if(!championEra)return json({champions:[]});
+      const entries=Object.entries(orderColumn);
+      const rows=await Promise.all(entries.map(async([metricKey,column])=>{
+        const record=await env.DB.prepare(`SELECT ${summaryColumns} FROM career_records WHERE is_public=1 AND ranking_era=? AND weekly_active=0 ORDER BY ${column} DESC,career_rating DESC LIMIT 1`).bind(championEra).first();
+        return record?{metric:metricKey,record:hydrate(record,true)}:null;
+      }));
+      return json({champions:rows.filter(Boolean)});
+    }
+    if(url.searchParams.get("archive")==="1"){
+      const rows=(await env.DB.prepare(`SELECT ${summaryColumns} FROM (SELECT ${summaryColumns},ROW_NUMBER() OVER(PARTITION BY weekly_id ORDER BY ${orderColumn[metric]} DESC,career_rating DESC) AS weekly_rank FROM career_records WHERE is_public=1 AND ranking_era IN ('v8','v81') AND weekly_active=1 AND weekly_id<>?) WHERE weekly_rank<=3 ORDER BY weekly_id DESC,weekly_rank ASC LIMIT 240`).bind(weeklyId).all()).results.map(x=>hydrate(x,true));
+      return json({rows});
+    }
+    const clause=era==="v7"?"ranking_era='v750' AND weekly_active=0":era==="v8"?"ranking_era='v8' AND weekly_active=0":era==="weekly"?"ranking_era IN ('v8','v81') AND weekly_active=1 AND weekly_id=?":"ranking_era='v81' AND weekly_active=0";
     const statement=env.DB.prepare(`SELECT ${summaryColumns} FROM career_records WHERE is_public=1 AND ${clause} ORDER BY ${orderColumn[metric]} DESC,career_rating DESC LIMIT 50`);
     const totalsStatement=env.DB.prepare(`SELECT COUNT(DISTINCT user_id) AS players,COUNT(*) AS careers,COALESCE(MAX(career_rating),0) AS top_power,COALESCE(MAX(peak_overall),0) AS top_peak FROM career_records WHERE is_public=1 AND ${clause}`);
     const [rowsResult,totals]=era==="weekly"

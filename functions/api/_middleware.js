@@ -1,7 +1,8 @@
 const CACHE_TTL_SECONDS = 300;
-const CACHE_VERSION = "v8.2";
+const CACHE_VERSION = "v8.5";
 
 function cacheablePath(url) {
+  if (url.pathname === "/api/careers" && url.searchParams.get("mine") === "1") return false;
   return url.pathname === "/api/careers" || url.pathname === "/api/news";
 }
 
@@ -119,20 +120,27 @@ function boardSpec(era, weeklyId) {
   if (era === "weekly") {
     return {
       key: `weekly:${weeklyId}`,
-      where: "is_public=1 AND ranking_era='v8' AND weekly_active=1 AND weekly_id=?",
+      where: "is_public=1 AND ranking_era IN ('v8','v81') AND weekly_active=1 AND weekly_id=?",
       binds: [weeklyId],
     };
   }
+  if (era === "v8") {
+    return {
+      key: "v8",
+      where: "is_public=1 AND ranking_era='v8' AND weekly_active=0 AND weekly_id=''",
+      binds: [],
+    };
+  }
   return {
-    key: "v8",
-    where: "is_public=1 AND ranking_era='v8' AND weekly_active=0 AND weekly_id=''",
+    key: "v81",
+    where: "is_public=1 AND ranking_era='v81' AND weekly_active=0 AND weekly_id=''",
     binds: [],
   };
 }
 
 async function optimizedLeaderboard(request, env) {
   const url = new URL(request.url);
-  const era = ["v8", "v7", "weekly"].includes(url.searchParams.get("era")) ? url.searchParams.get("era") : "v8";
+  const era = ["v81", "v8", "v7", "weekly"].includes(url.searchParams.get("era")) ? url.searchParams.get("era") : "v81";
   const metric = optimizedOrderColumn[url.searchParams.get("metric")] ? url.searchParams.get("metric") : "power";
   const order = optimizedOrderColumn[metric];
   const weeklyId = String(url.searchParams.get("weekly_id") || "").trim().slice(0, 30);
@@ -141,11 +149,22 @@ async function optimizedLeaderboard(request, env) {
   // the existing API instead of taking the leaderboard down.
   await env.DB.prepare("SELECT board_key FROM leaderboard_stats LIMIT 1").first();
 
+  if (url.searchParams.get("champions") === "1") {
+    const championEra = era === "v7" ? "v750" : era === "v8" ? "v8" : "";
+    if (!championEra) return { champions: [] };
+    const entries = Object.entries(optimizedOrderColumn);
+    const results = await env.DB.batch(entries.map(([, column]) => env.DB.prepare(
+      `SELECT ${summaryColumns} FROM career_records WHERE is_public=1 AND ranking_era=? AND weekly_active=0 ORDER BY ${column} DESC,career_rating DESC LIMIT 1`
+    ).bind(championEra)));
+    return { champions: entries.map(([metric], index) => ({metric, record: hydrateSummary(results[index]?.results?.[0])})).filter(x => x.record) };
+  }
+
   if (url.searchParams.get("archive") === "1") {
     const rows = (await env.DB.prepare(
-      `SELECT ${summaryColumns} FROM career_records
-       WHERE is_public=1 AND ranking_era='v8' AND weekly_active=1 AND weekly_id<>?
-       ORDER BY ${order} DESC,career_rating DESC LIMIT 150`
+      `SELECT ${summaryColumns} FROM (
+         SELECT ${summaryColumns},ROW_NUMBER() OVER(PARTITION BY weekly_id ORDER BY ${order} DESC,career_rating DESC) AS weekly_rank
+         FROM career_records WHERE is_public=1 AND ranking_era IN ('v8','v81') AND weekly_active=1 AND weekly_id<>?
+       ) WHERE weekly_rank<=3 ORDER BY weekly_id DESC,weekly_rank ASC LIMIT 240`
     ).bind(weeklyId).all()).results || [];
     return { rows: rows.map(hydrateSummary) };
   }
@@ -202,8 +221,10 @@ async function refreshBoardStats(env, row) {
   let spec;
   if (row.ranking_era === "v750") {
     spec = boardSpec("v7", "");
-  } else if (row.ranking_era === "v8" && row.weekly_active) {
+  } else if (row.ranking_era === "v81" && row.weekly_active) {
     spec = boardSpec("weekly", String(row.weekly_id || ""));
+  } else if (row.ranking_era === "v81") {
+    spec = boardSpec("v81", "");
   } else if (row.ranking_era === "v8") {
     spec = boardSpec("v8", "");
   } else {
@@ -329,8 +350,10 @@ export async function onRequest(context) {
   if (request.method === "POST" && url.pathname === "/api/careers") {
     const response = await context.next();
     if (response.ok) {
-      context.waitUntil(maintainPublishedCareer(context.env, response.clone()));
-      context.waitUntil(clearCareerListCache());
+      context.waitUntil((async () => {
+        await maintainPublishedCareer(context.env, response.clone());
+        await clearCareerListCache();
+      })());
     }
     return response;
   }

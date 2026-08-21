@@ -1,0 +1,16 @@
+{
+  "name": "BasketballLife 籃球人生模擬器",
+  "short_name": "BasketballLife",
+  "description": "從 HBL 開始，走完整段台灣籃球生涯。",
+  "lang": "zh-Hant-TW",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#071019",
+  "theme_color": "#0b151e",
+  "icons": [
+    {"src": "./apple-touch-icon.png", "sizes": "180x180", "type": "image/png"},
+    {"src": "./basketballlife-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

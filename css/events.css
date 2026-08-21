@@ -1,0 +1,1101 @@
+/* Event flow, choices and active screens. Keep stylesheet load order unchanged. */
+/* ===== Consolidated source block 9 ===== */
+/* V7.30 safety: after removing the old career-log sidebar,
+   the main story is now the only card inside .layout. Never hide it. */
+.layout > main.card.story{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+.layout > main.card.story:last-child{
+  display:block!important;
+}
+
+/* ===== Consolidated source block 10 ===== */
+/* =========================================================
+   V7.31 NATURAL DECISION FLOW
+   選項靠近題目；不再硬貼螢幕最底造成大片空白。
+   ========================================================= */
+
+/* 主內容整體再緊一點 */
+.wrap{
+  max-width:820px!important;
+  padding-top:8px!important;
+  padding-bottom:24px!important;
+}
+.story.card{
+  padding-bottom:0!important;
+}
+.chapter{
+  margin-top:8px!important;
+  margin-bottom:4px!important;
+}
+.story h2{
+  margin:4px 0 6px!important;
+}
+.text{
+  margin-bottom:6px!important;
+}
+.feedHistory{
+  max-height:390px!important;
+}
+
+/* 展開舊年份時稍微給更多高度，但只在自己的區域內捲動 */
+.feedHistory.hasOpenYear{
+  max-height:430px!important;
+}
+.feedYearDrawer{
+  max-height:310px!important;
+}
+
+/* 選項不再 fixed；直接接在目前事件下面 */
+.choices:not(:empty){
+  position:relative!important;
+  left:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  z-index:auto!important;
+  width:100%!important;
+  max-height:none!important;
+  overflow:visible!important;
+  margin:8px 0 0!important;
+  padding:18px 10px 10px!important;
+  border:1px solid #455c6d!important;
+  border-radius:12px!important;
+  background:
+    linear-gradient(180deg,rgba(19,31,41,.96),rgba(11,18,24,.98))!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.20)!important;
+  backdrop-filter:none!important;
+}
+.choices:not(:empty):before{
+  top:4px!important;
+}
+.choices:not(:empty) .choice{
+  margin:0!important;
+}
+
+/* 下一步也跟著內容，不再黏最底 */
+#next:not(.hidden){
+  position:relative!important;
+  left:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  z-index:auto!important;
+  width:100%!important;
+  margin:8px 0 0!important;
+  padding:11px 14px!important;
+  border-radius:10px!important;
+  box-shadow:0 7px 20px rgba(223,119,54,.16)!important;
+}
+
+/* 移除舊版為固定底欄預留的巨大空間 */
+#game.hasChoices .story,
+#game.hasNext .story{
+  padding-bottom:0!important;
+}
+#game.hasChoices .feedHistory,
+#game.hasNext .feedHistory{
+  max-height:390px!important;
+}
+
+/* 目前事件卡與決策視覺連成一組 */
+#special + .choices:not(:empty){
+  margin-top:6px!important;
+}
+#special:empty + .choices:not(:empty){
+  margin-top:4px!important;
+}
+
+/* 避免某些空 special / text 區撐高 */
+#special:empty{
+  display:none!important;
+}
+.text:empty{
+  display:none!important;
+}
+#feedHistory:empty{
+  display:none!important;
+}
+
+/* 目前年度區塊留白縮小 */
+.feedYearLine{
+  margin:4px 0!important;
+}
+.feedCard{
+  margin-bottom:4px!important;
+}
+.chapterCard{
+  margin-bottom:4px!important;
+}
+
+/* 桌機1080p：稍微放寬內容高度，讓事件＋選項盡量同屏 */
+@media(min-width:900px) and (min-height:850px){
+  .feedHistory{
+    max-height:420px!important;
+  }
+  .feedHistory.hasOpenYear{
+    max-height:460px!important;
+  }
+}
+
+/* 手機：選項仍直接接在事件後面 */
+@media(max-width:620px){
+  .choices:not(:empty),
+  #next:not(.hidden){
+    width:100%!important;
+    border-radius:10px!important;
+  }
+}
+
+/* ===== Consolidated source block 11 ===== */
+/* =========================================================
+   V7.32 CURRENT EVENT BOTTOM DOCK + TYPOGRAPHY HIERARCHY
+   上方＝生涯時間軸
+   下方＝目前事件內容 + 選項 / 下一步（整組固定在底部）
+   ========================================================= */
+
+:root{
+  --game-top-space:238px;
+}
+
+/* Gameplay area uses the viewport, not an infinitely growing page */
+#game:not(.hidden) .layout{
+  height:calc(100dvh - var(--game-top-space));
+  min-height:590px;
+  overflow:hidden;
+}
+#game:not(.hidden) .story.card{
+  height:100%;
+  min-height:0;
+  display:flex!important;
+  flex-direction:column;
+  overflow:hidden!important;
+  padding:0!important;
+}
+
+/* ---------------- HISTORY AREA ---------------- */
+.feedHistory{
+  flex:1 1 auto!important;
+  min-height:72px;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  padding:4px 4px 8px;
+  scrollbar-width:thin;
+}
+.feedHistory.hasOpenYear{
+  max-height:none!important;
+}
+.feedYearDrawer{
+  max-height:300px!important;
+}
+
+/* ---------------- CURRENT EVENT AREA ---------------- */
+/* This WHOLE panel sits at the bottom. Event content is directly
+   above the decision controls, exactly as requested. */
+.currentPanel{
+  flex:0 0 auto;
+  width:100%;
+  max-height:72%;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  position:relative;
+  z-index:20;
+  padding:8px 8px 6px;
+  border:1px solid #405463;
+  border-bottom-color:#9a6238;
+  border-radius:13px 13px 0 0;
+  background:
+    linear-gradient(180deg,rgba(14,23,31,.985),rgba(9,16,22,.995));
+  box-shadow:0 -14px 34px rgba(0,0,0,.34);
+  scrollbar-width:thin;
+}
+.currentPanel #special{
+  margin:0;
+}
+.currentPanel #special:empty,
+.currentPanel .text:empty{
+  display:none!important;
+}
+
+/* Current event content -> choices are contiguous */
+.currentPanel .choices:not(:empty){
+  position:sticky!important;
+  left:auto!important;
+  bottom:0!important;
+  transform:none!important;
+  z-index:35!important;
+  width:100%!important;
+  max-height:42vh!important;
+  overflow-y:auto!important;
+  margin:7px 0 0!important;
+  padding:18px 8px 8px!important;
+  border:1px solid #455d6e!important;
+  border-radius:11px!important;
+  background:rgba(13,23,31,.985)!important;
+  box-shadow:0 -8px 22px rgba(0,0,0,.25)!important;
+  backdrop-filter:blur(7px);
+}
+.currentPanel .choices:not(:empty):before{
+  content:"決策";
+  position:absolute!important;
+  top:3px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  padding:0 8px!important;
+  border:0!important;
+  background:transparent!important;
+  color:#9bb1c0!important;
+  font-size:10.5px!important;
+  font-weight:800!important;
+  letter-spacing:1.5px!important;
+}
+
+/* NEXT is always the bottom-most control of CURRENT EVENT */
+.currentPanel #next:not(.hidden){
+  position:sticky!important;
+  left:auto!important;
+  bottom:0!important;
+  transform:none!important;
+  z-index:36!important;
+  width:100%!important;
+  margin:8px 0 0!important;
+  padding:12px 14px!important;
+  border-radius:10px!important;
+  box-shadow:0 -6px 19px rgba(0,0,0,.24)!important;
+}
+
+/* Old global fixed-dock reserve must never create dead space */
+#game.hasChoices .story,
+#game.hasNext .story{
+  padding-bottom:0!important;
+}
+#game.hasChoices .feedHistory,
+#game.hasNext .feedHistory{
+  max-height:none!important;
+}
+
+/* =========================================================
+   TYPOGRAPHY
+   1. Page / stage heading
+   2. Card heading
+   3. Body
+   4. Meta / helper text
+   ========================================================= */
+
+/* Top player area */
+.header .who b{
+  font-size:18px!important;
+  font-weight:950!important;
+}
+.header .box b{
+  font-size:16.5px!important;
+  font-weight:900!important;
+}
+.header .box small{
+  font-size:10.5px!important;
+}
+.teamname{
+  font-size:12.5px!important;
+}
+.flow span{
+  font-size:11px!important;
+}
+.titleBadge,.mentalBadge{
+  font-size:10.5px!important;
+}
+
+/* CURRENT stage heading */
+.currentPanel .chapter{
+  margin:2px 0 4px!important;
+  font-size:11.5px!important;
+  font-weight:800!important;
+  letter-spacing:1.7px!important;
+  color:#83add0!important;
+}
+.currentPanel h2{
+  display:block!important;
+  margin:2px 0 7px!important;
+  font-size:21px!important;
+  line-height:1.25!important;
+  font-weight:950!important;
+  color:#ee9f52!important;
+}
+
+/* Main narrative */
+.currentPanel .text{
+  margin:0 0 7px!important;
+  padding:10px 12px!important;
+  font-size:14.5px!important;
+  line-height:1.58!important;
+}
+
+/* Generic card title / body hierarchy */
+.currentPanel #special{
+  font-size:14px;
+}
+.currentPanel #special b{
+  line-height:1.35;
+}
+.currentPanel .notice > b,
+.currentPanel .healthok > b,
+.currentPanel .injuryCard > b,
+.currentPanel .medicalPanel > b,
+.currentPanel .bodyWarning > b,
+.currentPanel .specialStage > b,
+.currentPanel .contractDecision > b,
+.currentPanel .offerCard > b,
+.currentPanel .chapterHero,
+.currentPanel .outcomeHead b{
+  font-size:16px!important;
+  font-weight:950!important;
+}
+.currentPanel .notice,
+.currentPanel .eventResult,
+.currentPanel .outcome,
+.currentPanel .healthok,
+.currentPanel .injury,
+.currentPanel .injuryCard,
+.currentPanel .medicalPanel,
+.currentPanel .bodyWarning,
+.currentPanel .specialStage,
+.currentPanel .chapterCard,
+.currentPanel .contractDecision,
+.currentPanel .offerCard{
+  font-size:14px!important;
+  line-height:1.55!important;
+}
+.currentPanel .mut,
+.currentPanel small{
+  font-size:12px!important;
+  line-height:1.45!important;
+}
+
+/* Decisions */
+.currentPanel .choice{
+  padding:11px 13px!important;
+}
+.currentPanel .choice b{
+  font-size:15.5px!important;
+  line-height:1.25!important;
+}
+.currentPanel .choice small{
+  font-size:12.5px!important;
+  line-height:1.45!important;
+}
+.currentPanel .strategyTag{
+  font-size:11px!important;
+}
+
+/* Training hierarchy */
+.dicewrap{
+  font-size:14px!important;
+}
+.dicewrap > b,
+.dicewrap .trainingTitle{
+  font-size:16px!important;
+}
+.die{
+  width:44px!important;
+  height:44px!important;
+  font-size:19px!important;
+}
+.assign button{
+  font-size:11.5px!important;
+}
+.trainingStats .sl b{
+  font-size:14px!important;
+}
+.trainingStats .sl > span{
+  font-size:12px!important;
+}
+
+/* Points page: single column + bottom finish */
+.pointHead{
+  position:static!important;
+  top:auto!important;
+  margin:0 0 6px!important;
+  padding:7px 9px!important;
+}
+.pointBalance span:first-child{
+  font-size:13px!important;
+}
+.points{
+  font-size:25px!important;
+}
+.pointrow .pointName b{
+  font-size:14px!important;
+}
+.pointrow .pointValue{
+  font-size:12px!important;
+}
+.pointrow small{
+  font-size:11px!important;
+}
+.pointFinish{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:38!important;
+  display:block!important;
+  width:100%!important;
+  margin:8px 0 0!important;
+  padding:12px 14px!important;
+  border-radius:10px!important;
+  font-size:14px!important;
+  box-shadow:0 -6px 18px rgba(0,0,0,.22)!important;
+}
+
+/* Results hierarchy */
+.tourney .name{
+  font-size:14px!important;
+  font-weight:900!important;
+}
+.tourney .finish,.tourney .reward{
+  font-size:12.5px!important;
+}
+.seasonStatLine{
+  font-size:13px!important;
+}
+.seasonStatLine b{
+  font-size:14.5px!important;
+}
+.awards,.breakdown{
+  font-size:13px!important;
+}
+
+/* Timeline is readable but visually secondary to current event */
+.feedYearLine{
+  font-size:11.5px!important;
+}
+.feedArchiveCard,
+.feedCard{
+  font-size:13px!important;
+}
+.feedKicker{
+  font-size:12px!important;
+}
+.feedBody,
+.feedArchiveText{
+  font-size:12.5px!important;
+}
+
+/* 1080p desktop: enough history + bottom interaction */
+@media(min-width:900px) and (min-height:900px){
+  :root{--game-top-space:232px}
+  .currentPanel{
+    max-height:70%;
+  }
+}
+
+/* Smaller viewports: current event gets priority */
+@media(max-height:820px){
+  :root{--game-top-space:220px}
+  .currentPanel{
+    max-height:76%;
+  }
+}
+@media(max-width:620px){
+  #game:not(.hidden) .layout{
+    height:auto;
+    min-height:0;
+    overflow:visible;
+  }
+  #game:not(.hidden) .story.card{
+    height:auto;
+    overflow:visible!important;
+  }
+  .feedHistory{
+    max-height:260px!important;
+  }
+  .currentPanel{
+    max-height:none;
+    overflow:visible;
+    border-left:0;
+    border-right:0;
+  }
+  .currentPanel .choices:not(:empty),
+  .currentPanel #next:not(.hidden){
+    position:sticky!important;
+    bottom:0!important;
+  }
+  .currentPanel h2{font-size:19px!important}
+  .currentPanel .text{font-size:14px!important}
+}
+
+/* ===== Consolidated source block 12 ===== */
+/* =========================================================
+   V7.33 TYPOGRAPHY POLISH
+   參考資訊層級，不複製原圖配色：
+   主標 > 卡片標題 > 主要內容 > 關鍵數值 > 輔助文字
+   ========================================================= */
+
+html,body,button,input{
+  font-family:
+    "Noto Sans TC","Microsoft JhengHei","PingFang TC",
+    "Segoe UI",system-ui,sans-serif;
+}
+body{
+  font-weight:500;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ---------- Top identity ---------- */
+.brand{
+  font-size:25px!important;
+  font-weight:950!important;
+  letter-spacing:-.55px!important;
+}
+.header .who b{
+  font-size:19px!important;
+  font-weight:950!important;
+  letter-spacing:.1px!important;
+}
+.header .who .teamname,
+.teamname{
+  margin-top:4px!important;
+  font-size:13px!important;
+  font-weight:850!important;
+  color:#eca45c!important;
+}
+.header .box small{
+  color:#7f93a4!important;
+  font-size:10px!important;
+  font-weight:750!important;
+  letter-spacing:.45px!important;
+}
+.header .box b{
+  font-size:18px!important;
+  font-weight:950!important;
+  color:#f6f1e9!important;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- Timeline = secondary information ---------- */
+.feedYearLine{
+  color:#8cb5aa!important;
+  font-size:11px!important;
+  font-weight:750!important;
+  letter-spacing:2.2px!important;
+}
+.feedKicker{
+  margin-bottom:6px!important;
+  color:#92abbc!important;
+  font-size:11.5px!important;
+  font-weight:900!important;
+  letter-spacing:.5px!important;
+}
+.feedCard,
+.feedArchiveCard{
+  font-size:13px!important;
+}
+.feedBody{
+  color:#eae5dd!important;
+  font-size:13.5px!important;
+  line-height:1.6!important;
+}
+.feedBody b{
+  color:#f0aa60!important;
+  font-weight:950!important;
+}
+
+/* ---------- Current page hierarchy ---------- */
+.currentPanel .chapter{
+  color:#7eafd2!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  letter-spacing:1.6px!important;
+}
+.currentPanel h2{
+  margin-bottom:8px!important;
+  color:#f0a057!important;
+  font-size:22px!important;
+  font-weight:950!important;
+  line-height:1.18!important;
+  letter-spacing:-.2px!important;
+}
+.currentPanel .text{
+  color:#f0ece5!important;
+  font-size:15px!important;
+  font-weight:600!important;
+  line-height:1.65!important;
+}
+.currentPanel .text b{
+  color:#efaa60!important;
+  font-weight:950!important;
+}
+
+/* ---------- Reusable small label / big value ---------- */
+.cardLabel,
+.resultSectionTitle{
+  margin-bottom:7px;
+  color:#93a8b8;
+  font-size:11.5px;
+  font-weight:900;
+  letter-spacing:.7px;
+}
+.resultSectionTitle{
+  color:#e4a159;
+  font-size:13px;
+}
+.medicalValue{
+  display:block;
+  margin-top:2px;
+  color:#f0ece5;
+  font-size:17px!important;
+  font-weight:950!important;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- Event result ---------- */
+.outcome{
+  padding:13px 14px!important;
+}
+.outcomeHead{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  margin-bottom:9px!important;
+}
+.outcomeHead > b{
+  color:#f5efe8!important;
+  font-size:17px!important;
+  font-weight:950!important;
+  line-height:1.25!important;
+}
+.outcomeRate{
+  flex:none;
+  color:#8fa3b1;
+  font-size:11px;
+  font-weight:750;
+  white-space:nowrap;
+}
+.eventMain{
+  color:#eee9e2;
+  font-size:15px;
+  font-weight:650;
+  line-height:1.62;
+}
+.eventMain b{
+  font-weight:950;
+}
+.changes{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:6px!important;
+  margin-top:9px!important;
+}
+.change{
+  padding:5px 8px!important;
+  border-radius:7px!important;
+  font-size:12.5px!important;
+  font-weight:950!important;
+}
+.change.pos{
+  color:#7cdda9!important;
+}
+.change.neg{
+  color:#ff8d82!important;
+}
+.eventMeta{
+  margin-top:8px;
+  color:#7f929f;
+  font-size:10.5px;
+  font-weight:600;
+}
+.eventMeta b{
+  color:#a9bbc7;
+  font-size:11px;
+}
+
+/* ---------- Choice hierarchy ---------- */
+.currentPanel .choices:not(:empty):before{
+  color:#8298a8!important;
+  font-size:10px!important;
+  font-weight:850!important;
+}
+.currentPanel .choice{
+  padding:12px 14px!important;
+}
+.currentPanel .choice b{
+  display:block!important;
+  margin-bottom:4px!important;
+  color:#f4efe8!important;
+  font-size:16px!important;
+  font-weight:950!important;
+  line-height:1.2!important;
+}
+.currentPanel .choice small{
+  color:#8fa0ad!important;
+  font-size:12px!important;
+  font-weight:600!important;
+  line-height:1.45!important;
+}
+.currentPanel .strategyTag{
+  font-size:10.5px!important;
+  font-weight:900!important;
+}
+
+/* ---------- Training ---------- */
+.trainingTitle{
+  color:#f1a35a;
+  font-size:16px;
+  font-weight:950;
+  line-height:1.25;
+}
+.trainingSummary{
+  margin-top:4px;
+  color:#97a7b4;
+  font-size:12px;
+  font-weight:650;
+}
+.trainingSummary .gold{
+  font-size:13px;
+  font-weight:950;
+}
+.die{
+  font-weight:950!important;
+}
+.trainingStats .sl b{
+  color:#e9e5de!important;
+  font-size:14px!important;
+  font-weight:900!important;
+}
+.trainingStats .sl > span{
+  color:#d7e0e6!important;
+  font-size:12px!important;
+  font-weight:900!important;
+}
+
+/* ---------- Health ---------- */
+.healthHeadline{
+  color:#f0ece5;
+  font-size:16px;
+  font-weight:950;
+}
+.healthSub{
+  margin-top:3px;
+  color:#9badb9;
+  font-size:12px;
+  font-weight:650;
+}
+.healthSub b{
+  color:#79d8aa;
+  font-size:13px;
+  font-weight:950;
+}
+.injuryCard > b{
+  color:#ff9b8c!important;
+  font-size:17px!important;
+  font-weight:950!important;
+}
+.medicalCell small{
+  color:#8095a5!important;
+  font-size:10px!important;
+  font-weight:750!important;
+}
+.medicalCell b{
+  color:#eee9e2!important;
+  font-size:13.5px!important;
+  font-weight:950!important;
+}
+.medicalHistory{
+  margin-top:6px;
+  color:#b0bec8;
+  font-size:12px;
+}
+
+/* ---------- Season results ---------- */
+.tourney .name{
+  color:#e9e5de!important;
+  font-size:14.5px!important;
+  font-weight:900!important;
+}
+.tourney .finish{
+  color:#eea45b!important;
+  font-size:14px!important;
+  font-weight:950!important;
+}
+.tourney .reward{
+  color:#73d5a4!important;
+  font-size:12px!important;
+  font-weight:900!important;
+}
+.seasonStatLine{
+  padding:11px!important;
+}
+.statSummary{
+  display:grid;
+  grid-template-columns:repeat(9,minmax(0,1fr));
+  gap:5px;
+}
+.statSummary span{
+  min-width:0;
+  padding:6px 4px;
+  text-align:center;
+  border-right:1px solid #2b414f;
+}
+.statSummary span:last-child{
+  border-right:0;
+}
+.statSummary small{
+  display:block;
+  margin-bottom:2px;
+  color:#7d909f!important;
+  font-size:9.5px!important;
+  font-weight:750!important;
+}
+.statSummary b{
+  display:block;
+  color:#f2eee7!important;
+  font-size:14px!important;
+  font-weight:950!important;
+  font-variant-numeric:tabular-nums;
+}
+.awardBody{
+  color:#d9e0e3;
+  font-size:13px;
+  line-height:1.7;
+}
+.awardBody b{
+  color:#efaa5f;
+  font-weight:900;
+}
+.breakdown{
+  color:#b7c2ca;
+  font-size:12.5px!important;
+  line-height:1.75!important;
+}
+.breakdown .gold{
+  color:#efaa5f!important;
+  font-size:13.5px!important;
+  font-weight:950!important;
+}
+
+/* ---------- Ability point allocation ---------- */
+.pointBalance span:first-child{
+  color:#92a5b3!important;
+  font-size:12px!important;
+  font-weight:800!important;
+}
+.points{
+  color:#ef9d4f!important;
+  font-size:27px!important;
+  font-weight:950!important;
+}
+.pointrow .pointName b{
+  color:#ede8e1!important;
+  font-size:14px!important;
+  font-weight:950!important;
+}
+.pointrow .pointValue{
+  color:#9fb1bd!important;
+  font-size:12px!important;
+  font-weight:800!important;
+}
+.pointrow small{
+  color:#7f929f!important;
+  font-size:10.5px!important;
+  font-weight:600!important;
+}
+.pointrow small .gold,
+.pointrow .gold{
+  color:#efaa5e!important;
+  font-weight:950!important;
+}
+
+/* ---------- Chapter / season transition ---------- */
+.chapterEyebrow{
+  color:#c88043!important;
+  font-size:10px!important;
+  font-weight:950!important;
+  letter-spacing:1.8px!important;
+}
+.chapterYear{
+  color:#8ca0ae!important;
+  font-size:11px!important;
+  font-weight:700!important;
+}
+.chapterHero{
+  color:#f1ede6!important;
+  font-size:17px!important;
+  font-weight:800!important;
+  line-height:1.5!important;
+}
+.chapterHero b,
+.chapterTeam{
+  color:#ef9f50!important;
+  font-weight:950!important;
+}
+.chapterCard > .mut{
+  color:#889ba9!important;
+  font-size:11.5px!important;
+}
+.chapterMeta span{
+  font-size:10.5px!important;
+  font-weight:750!important;
+}
+
+/* ---------- Button / next ---------- */
+.currentPanel #next:not(.hidden),
+.pointFinish{
+  font-size:14.5px!important;
+  font-weight:950!important;
+}
+
+/* Desktop numbers should not look tiny */
+@media(min-width:900px){
+  .currentPanel{
+    scrollbar-gutter:stable;
+  }
+}
+
+/* Small screens: preserve hierarchy, not microscopic text */
+@media(max-width:620px){
+  .currentPanel h2{font-size:20px!important}
+  .currentPanel .text{font-size:14px!important}
+  .eventMain{font-size:14px}
+  .outcomeHead{display:block!important}
+  .outcomeRate{display:block;margin-top:4px;white-space:normal}
+  .statSummary{grid-template-columns:repeat(3,1fr)}
+  .statSummary span{border-right:0;border-bottom:1px solid #2b414f}
+}
+
+/* ===== Consolidated source block 13 ===== */
+/* =========================================================
+   V7.34 TRUE VIEWPORT FIT
+   高度由 JS 依瀏覽器實際可視區計算，不再猜固定 232px。
+   ========================================================= */
+#game:not(.hidden) .layout{
+  height:var(--actual-game-height,calc(100dvh - 220px))!important;
+  min-height:420px!important;
+  overflow:hidden!important;
+}
+#game:not(.hidden) .story.card{
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+/* History yields space to the active interaction. */
+.feedHistory{
+  flex:1 1 86px!important;
+  min-height:58px;
+  max-height:none!important;
+  overflow-y:auto!important;
+}
+
+/* Current content is allowed to use almost the whole remaining viewport.
+   Old 70/72/76% caps were the main reason the bottom was clipped. */
+.currentPanel{
+  flex:0 0 auto!important;
+  max-height:calc(100% - 58px)!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+}
+
+/* During long pages, archive history becomes a thin strip automatically. */
+[data-stage="training"] .feedHistory,
+[data-stage="points"] .feedHistory,
+[data-stage="results"] .feedHistory,
+[data-stage="decision"] .feedHistory{
+  flex-basis:44px!important;
+  min-height:38px!important;
+  max-height:64px!important;
+}
+[data-stage="training"] .currentPanel,
+[data-stage="points"] .currentPanel,
+[data-stage="results"] .currentPanel,
+[data-stage="decision"] .currentPanel{
+  max-height:calc(100% - 42px)!important;
+}
+
+/* Avoid wasting vertical space above long interaction screens. */
+[data-stage="training"] .currentPanel .chapter,
+[data-stage="points"] .currentPanel .chapter{
+  margin-top:0!important;
+}
+[data-stage="training"] .currentPanel h2,
+[data-stage="points"] .currentPanel h2{
+  margin-top:0!important;
+  margin-bottom:5px!important;
+}
+[data-stage="training"] .currentPanel .text,
+[data-stage="points"] .currentPanel .text{
+  padding-top:8px!important;
+  padding-bottom:8px!important;
+  margin-bottom:5px!important;
+}
+
+/* Automatic density tiers based on the REAL browser viewport height. */
+body[data-viewport-band="md"] [data-stage="training"] .trainingStats .stat,
+body[data-viewport-band="md"] [data-stage="points"] .pointrow{
+  min-height:37px!important;
+  padding-top:4px!important;
+  padding-bottom:4px!important;
+}
+body[data-viewport-band="sm"] [data-stage="training"] .trainingStats .stat,
+body[data-viewport-band="sm"] [data-stage="points"] .pointrow{
+  min-height:34px!important;
+  padding:3px 7px!important;
+}
+body[data-viewport-band="sm"] [data-stage="training"] .trainingStats{
+  gap:3px!important;
+}
+body[data-viewport-band="sm"] [data-stage="training"] .dicewrap{
+  padding:7px 9px!important;
+}
+body[data-viewport-band="sm"] [data-stage="training"] .die{
+  width:38px!important;height:38px!important;font-size:17px!important;
+}
+body[data-viewport-band="sm"] .currentPanel h2{
+  font-size:19px!important;
+}
+body[data-viewport-band="sm"] .currentPanel .text{
+  font-size:13.5px!important;
+}
+body[data-viewport-band="sm"] [data-stage="training"] .trainingStats .sl b,
+body[data-viewport-band="sm"] [data-stage="points"] .pointrow .pointName b{
+  font-size:12.5px!important;
+}
+body[data-viewport-band="sm"] [data-stage="training"] .trainingStats .sl > span,
+body[data-viewport-band="sm"] [data-stage="points"] .pointrow .pointValue{
+  font-size:10.5px!important;
+}
+body[data-viewport-band="sm"] [data-stage="points"] .pointrow small{
+  font-size:9.5px!important;
+}
+
+/* Very short laptop/browser windows: hide old full cards, keep only year rows. */
+body[data-viewport-band="xs"] .feedCard{
+  display:none!important;
+}
+body[data-viewport-band="xs"] .feedHistory{
+  flex-basis:34px!important;
+  min-height:30px!important;
+  max-height:45px!important;
+}
+body[data-viewport-band="xs"] .currentPanel{
+  max-height:calc(100% - 32px)!important;
+}
+body[data-viewport-band="xs"] .currentPanel h2{
+  font-size:18px!important;
+}
+body[data-viewport-band="xs"] .currentPanel .text{
+  font-size:13px!important;
+  padding:7px 9px!important;
+}
+body[data-viewport-band="xs"] [data-stage="training"] .trainingStats .stat,
+body[data-viewport-band="xs"] [data-stage="points"] .pointrow{
+  min-height:31px!important;
+  padding:2px 6px!important;
+}
+body[data-viewport-band="xs"] [data-stage="training"] .die{
+  width:35px!important;height:35px!important;font-size:16px!important;
+}
+body[data-viewport-band="xs"] [data-stage="training"] .assign button{
+  padding:4px 3px!important;font-size:10px!important;
+}
+
+/* Wide 1080p screens: let the game use more width and reduce needless wrapping. */

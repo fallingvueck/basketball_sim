@@ -65,51 +65,6 @@ html,body{
   line-height:1.5;
   text-align:right;
 }
-.setup>.blFastStartButton{
-  margin-top:0!important;
-  box-shadow:0 10px 24px rgba(229,150,73,.13)!important;
-}
-.blAdvancedSetup{
-  margin:12px 28px 18px;
-  border:1px solid #2d4351;
-  border-radius:12px;
-  background:#0a151d;
-  overflow:hidden;
-}
-.blAdvancedSetup>summary{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-  min-height:58px;
-  padding:10px 15px;
-  color:#d7e0e3;
-  cursor:pointer;
-  list-style:none;
-  user-select:none;
-}
-.blAdvancedSetup>summary::-webkit-details-marker{display:none}
-.blAdvancedSetup>summary span{display:grid;gap:3px}
-.blAdvancedSetup>summary b{font-size:13px}
-.blAdvancedSetup>summary small{color:#8498a3;font-size:10.5px}
-.blAdvancedSetup>summary em{
-  flex:0 0 auto;
-  color:#e4a05a;
-  font-size:11px;
-  font-style:normal;
-  font-weight:900;
-}
-.blAdvancedSetup[open]>summary{
-  border-bottom:1px solid #2a3e4a;
-  background:#0e1d27;
-}
-.blAdvancedSetupBody{padding:16px}
-.blAdvancedSetupBody>.setupBuilder{margin:0 0 16px!important}
-.blAdvancedSetupBody>label{display:block;margin:12px 0 7px!important}
-.blAdvancedSetupBody>.seed,
-.blAdvancedSetupBody>.seedError,
-.blAdvancedSetupBody>.seedHelp{margin-left:0!important;margin-right:0!important}
-
 .blQuickTrainingRow{
   display:flex;
   align-items:center;
@@ -199,8 +154,6 @@ body.retirementMode .legacyDetails{
   }
   .blQuickStartPromise b{white-space:normal}
   .blQuickStartPromise span{text-align:left}
-  .blAdvancedSetup{margin:10px 18px 16px!important}
-  .blAdvancedSetupBody{padding:12px}
   .blQuickTrainingRow{display:grid;gap:7px}
   .blQuickTrainingBtn{width:100%}
 
@@ -334,8 +287,6 @@ body.retirementMode .legacyDetails{
 @media(max-width:430px){
   .weeklyChallenge{padding:9px 12px!important}
   .blQuickStartPromise{padding:11px 12px}
-  .blAdvancedSetup>summary{padding:9px 12px}
-  .blAdvancedSetupBody{padding:10px}
   body.retirementMode .legacyMain{padding:6px!important}
   body.retirementMode .legacyHero{padding:12px 10px 10px!important}
   body.retirementMode .legacyCareerRail{padding:9px!important}
@@ -344,6 +295,30 @@ body.retirementMode .legacyDetails{
     grid-template-columns:76px minmax(0,1fr)!important;
     gap:8px!important;
   }
+}
+
+.eventChancePreview{
+  display:inline-flex;
+  margin-top:7px;
+  padding:3px 7px;
+  border:1px solid #355165;
+  border-radius:999px;
+  color:#9bc9e8;
+  font-size:10px;
+  font-weight:900;
+}
+
+/* V8.1 phone-first frame: desktop remains wide; phone/tablet play stays in one readable column. */
+@media(max-width:700px){
+  #game:not(.hidden) .feedHistory:not(.hasOpenYear){
+    max-height:72px!important;
+    overflow:hidden!important;
+  }
+  #game:not(.hidden) .feedHistory.hasOpenYear{
+    max-height:55dvh!important;
+    overflow-y:auto!important;
+  }
+  #currentPanel{scroll-margin-top:8px}
 }
 
 /* Retirement card: reuse the public-career information hierarchy. */
@@ -649,23 +624,18 @@ body.blHomeMode .blQuickStartPromise{
 }
 body.blHomeMode .blQuickStartPromise b{color:#f5b171!important;font-size:14px!important}
 body.blHomeMode .blQuickStartPromise span{color:#81939f!important;font-size:11px!important;text-align:right!important}
-body.blHomeMode .blHomeQuickPanel>.start{
-  width:100%!important;
-  min-height:58px!important;
-  margin:0!important;
-  padding:15px!important;
-  border-radius:14px!important;
-  background:linear-gradient(105deg,#ff7437,#f4b34f)!important;
-  color:#1b1008!important;
-  font-size:17px!important;
-  box-shadow:0 15px 36px rgba(239,125,49,.22)!important;
-}
-body.blHomeMode .blAdvancedSetup{
-  width:100%!important;
-  margin:12px 0 0!important;
-  border-color:#304655!important;
-  background:#09141c!important;
-}
+body.blHomeMode .blHomeStartActions{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(165px,.8fr);gap:9px;width:100%}
+body.blHomeMode .blHomeStartActions>.start{width:100%!important;min-height:58px!important;margin:0!important;padding:15px!important;border-radius:14px!important;background:linear-gradient(105deg,#ff7437,#f4b34f)!important;color:#1b1008!important;font-size:17px!important;box-shadow:0 15px 36px rgba(239,125,49,.22)!important}
+body.blHomeMode .blOpenCustomButton{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-width:0;padding:10px 13px;border:1px solid #425b6c;border-radius:14px;background:#10202b;color:#edf2f4;text-align:left;cursor:pointer}
+body.blHomeMode .blOpenCustomButton:hover{border-color:#e49a52;background:#152934}
+body.blHomeMode .blOpenCustomButton b{font-size:13px;white-space:nowrap}body.blHomeMode .blOpenCustomButton small{display:block;max-width:100%;margin-top:4px;overflow:hidden;color:#8297a4;font-size:9px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}
+body.blHomeMode .blHomeSeedPanel{width:100%;margin-top:12px;padding:13px;border:1px solid #304655;border-radius:12px;background:#09141c;box-sizing:border-box}
+body.blHomeMode .blHomeSeedPanel>label{display:block;margin:0 0 7px!important;color:#dce5eb!important;font-size:12px!important;font-weight:900}
+body.blHomeMode .blHomeSeedPanel>.seed{margin:0!important}.blHomeSeedPanel .seedHelp{margin:7px 0 0!important;font-size:9.5px!important;line-height:1.5}.blHomeSeedPanel .seedError{padding-top:3px}
+body.blHomeMode .blHomeCustomPanel{position:relative;z-index:1;display:flex;grid-column:2!important;flex-direction:column;min-width:0;padding:78px 32px 28px;background:linear-gradient(160deg,rgba(15,25,35,.98),rgba(7,14,20,.99));box-sizing:border-box}
+body.blHomeMode .blHomeCustomHead{padding-bottom:14px;border-bottom:1px solid #304553}.blHomeCustomHead small{display:block;margin-top:15px;color:#ff955d;font-size:9px;font-weight:950;letter-spacing:.16em}.blHomeCustomHead h2{margin:5px 0 3px;color:#f5f0e9;font-size:28px;line-height:1.1}.blHomeCustomHead p{margin:0;color:#8498a5;font-size:11px}.blCustomBack{padding:0;border:0;background:none;color:#9db2bf;font-size:11px;font-weight:900;cursor:pointer}.blCustomBack:hover{color:#f1ae69}
+body.blHomeMode .blHomeCustomBody{padding:14px 0}body.blHomeMode .blHomeCustomBody>.setupBuilder{display:grid!important;grid-template-columns:1fr!important;width:100%!important;margin:0!important;gap:10px!important}body.blHomeMode .blHomeCustomBody .setupSection{padding:14px!important}body.blHomeMode .blHomeCustomBody .setupSection.birthplaceSection{grid-column:auto!important}
+body.blHomeMode .blHomeCustomActions{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;margin-top:auto;padding-top:4px}.blHomeCustomActions button{min-height:48px;padding:10px;border:1px solid #40596a;border-radius:11px;background:#142431;color:#dce6eb;font-size:11px;font-weight:950;cursor:pointer}.blHomeCustomActions .blCustomStart{border-color:#ee9a4c;background:linear-gradient(105deg,#ff7437,#f4b34f);color:#1b1008}
 body.blHomeMode .continueCareerPanel{width:100%!important;margin:14px 0 0!important}
 body.blHomeMode .creatorCredit{margin:18px 0 0!important;color:#657680!important;text-align:center}
 body.blHomeMode .creatorCredit a{color:#a7b7bf!important}
@@ -697,7 +667,7 @@ body.blHomeMode .weeklyChallenge .weeklyChallengeTiming{
   line-height:1.25!important;
 }
 
-/* Turn the season result into a story people can retell, without changing simulation data. */
+/* Season receipt: concrete simulated evidence instead of generic fan quotes. */
 #game[data-stage="results"] .blSeasonStoryLegacy{display:none!important}
 #game[data-stage="results"] .blSeasonStoryCard{
   flex:1 0 100%;
@@ -751,6 +721,10 @@ body.blHomeMode .weeklyChallenge .weeklyChallengeTiming{
   line-height:1.5;
   letter-spacing:-.02em;
 }
+#game[data-stage="results"] .blSignatureMatchup{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:11px 13px;border:1px solid #3b515e;border-radius:10px;background:rgba(6,15,21,.68)}
+#game[data-stage="results"] .blSignatureMatchup b{color:#e9f0f3;font-size:14px;line-height:1.4}
+#game[data-stage="results"] .blSignatureMatchup span{padding:4px 8px;border-radius:999px;background:#28402f;color:#80d5a0;font-size:9px;font-weight:950;white-space:nowrap}
+#game[data-stage="results"] .blSignatureStatline{margin:8px 2px 0;color:#efb36f;font-size:11px;font-weight:850;line-height:1.55}
 #game[data-stage="results"] .blSeasonMoments{
   display:flex;
   flex-wrap:wrap;
@@ -766,7 +740,40 @@ body.blHomeMode .weeklyChallenge .weeklyChallengeTiming{
   font-size:10px;
   line-height:1.45;
 }
-#game[data-stage="results"] .blSeasonFanHead{
+#game[data-stage="results"] .blSeasonDataGrid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin-top:15px;
+}
+#game[data-stage="results"] .blSeasonDataGrid article{
+  min-width:0;
+  padding:12px;
+  border:1px solid #314552;
+  border-radius:11px;
+  background:rgba(8,17,23,.72);
+}
+#game[data-stage="results"] .blSeasonDataGrid small{
+  display:block;
+  color:#78909d;
+  font-size:9px;
+  font-weight:900;
+}
+#game[data-stage="results"] .blSeasonDataGrid b{
+  display:block;
+  margin-top:5px;
+  color:#f2b064;
+  font-size:17px;
+  line-height:1.2;
+}
+#game[data-stage="results"] .blSeasonDataGrid span{
+  display:block;
+  margin-top:5px;
+  color:#aab9c1;
+  font-size:9.5px;
+  line-height:1.45;
+}
+#game[data-stage="results"] .blSeasonRecordHead{
   display:flex;
   align-items:baseline;
   gap:9px;
@@ -774,37 +781,8 @@ body.blHomeMode .weeklyChallenge .weeklyChallengeTiming{
   padding-top:15px;
   border-top:1px solid #3e3d37;
 }
-#game[data-stage="results"] .blSeasonFanHead b{color:#f0b16f;font-size:12px}
-#game[data-stage="results"] .blSeasonFanHead span{color:#71838d;font-size:9px}
-#game[data-stage="results"] .blSeasonFanGrid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:8px;
-  margin-top:9px;
-}
-#game[data-stage="results"] .blSeasonFanGrid article{
-  min-width:0;
-  padding:12px;
-  border:1px solid #314552;
-  border-radius:11px;
-  background:rgba(8,17,23,.72);
-}
-#game[data-stage="results"] .blSeasonFanGrid article.spark{border-color:#76532f;background:rgba(45,31,18,.72)}
-#game[data-stage="results"] .blSeasonFanGrid article.critical{border-color:#714044;background:rgba(45,22,25,.72)}
-#game[data-stage="results"] .blSeasonFanGrid article.support{border-color:#38594e}
-#game[data-stage="results"] .blSeasonFanGrid p{
-  margin:0;
-  color:#d9e0e2;
-  font-size:11px;
-  line-height:1.65;
-}
-#game[data-stage="results"] .blSeasonFanGrid small{
-  display:block;
-  margin-top:8px;
-  color:#7f929c;
-  font-size:9px;
-  font-weight:800;
-}
+#game[data-stage="results"] .blSeasonRecordHead b{color:#f0b16f;font-size:12px}
+#game[data-stage="results"] .blSeasonRecordHead span{color:#71838d;font-size:9px}
 
 /* Keep the retirement share decision visually stronger than utility actions. */
 body.retirementMode .retirementShareCta{
@@ -866,10 +844,11 @@ body.retirementMode .retirementShareBtn span{font-weight:950}
 @media(max-width:700px){
   #game[data-stage="results"] .blSeasonStoryCard{margin-top:10px;padding:16px 14px}
   #game[data-stage="results"] .blSeasonStoryCard h3{font-size:20px;line-height:1.55}
-  #game[data-stage="results"] .blSeasonFanHead{display:block}
-  #game[data-stage="results"] .blSeasonFanHead span{display:block;margin-top:3px}
-  #game[data-stage="results"] .blSeasonFanGrid{grid-template-columns:1fr}
-  #game[data-stage="results"] .blSeasonFanGrid article{padding:11px 12px}
+  #game[data-stage="results"] .blSeasonDataGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #game[data-stage="results"] .blSeasonDataGrid article{padding:10px}
+  #game[data-stage="results"] .blSeasonRecordHead{display:block}
+  #game[data-stage="results"] .blSeasonRecordHead span{display:block;margin-top:3px}
+  #game[data-stage="results"] .blSignatureMatchup{align-items:flex-start;flex-direction:column;gap:6px}
   body.retirementMode .retirementShareCta{grid-template-columns:1fr;padding:13px}
   body.retirementMode .retirementShareCtaButtons{grid-template-columns:1fr}
 }
@@ -905,6 +884,7 @@ body.retirementMode .retirementShareBtn span{font-weight:950}
   body.blHomeMode .setupIdentity p{max-width:540px!important;font-size:13px!important}
   body.blHomeMode .setupIdentity:after{right:-155px!important;bottom:-210px!important}
   body.blHomeMode .blHomeQuickPanel{padding:24px 18px 22px}
+  body.blHomeMode .blHomeCustomPanel{padding:24px 18px 22px}
   body.blHomeMode .blQuickStartPromise{display:grid!important;gap:3px!important}
   body.blHomeMode .blQuickStartPromise span{text-align:left!important}
 }
@@ -922,4 +902,15 @@ body.retirementMode .retirementShareBtn span{font-weight:950}
   body.blHomeMode .blHomeQuickPanel{padding:22px 15px 20px}
   body.blHomeMode .blHomeQuickPanel>.posgrid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important}
   body.blHomeMode .blHomeQuickPanel>.posgrid button{min-height:54px!important;padding:6px 2px!important}
+  body.blHomeMode .blHomeStartActions,body.blHomeMode .blHomeCustomActions{grid-template-columns:1fr}
+  body.blHomeMode .blOpenCustomButton{min-height:54px}
+}
+
+@media(max-width:700px){
+  body>.wrap,
+  body.blHomeMode>.wrap{
+    width:min(100%,520px)!important;
+    max-width:520px!important;
+    margin-inline:auto!important;
+  }
 }
