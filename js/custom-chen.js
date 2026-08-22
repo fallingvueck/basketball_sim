@@ -27,7 +27,7 @@ playerAvatarSVG=function(seed,pos,age,label,playerName=""){
 const baseEnsureRomanceCandidate=ensureRomanceCandidate;
 ensureRomanceCandidate=function(){
  if(!isBlessedPlayer(p?.name))return baseEnsureRomanceCandidate();
- if(p.romanceCandidate?.name!=="阿鳥")p.romanceCandidate={id:"a_niao",name:"阿鳥",role:"唯一的場外對象",type:"stability",trait:"總能在荒唐的事件後把你拉回現實",bonus:"穩定陪伴讓家庭關係更容易修復"};
+ if(p.romanceCandidate?.name!=="阿鳥")p.romanceCandidate={id:"a_niao",name:"阿鳥",role:"場外認識的朋友",type:"stability",trait:"總能在荒唐的事件後把你拉回現實",bonus:"穩定陪伴讓家庭關係更容易修復"};
  return p.romanceCandidate;
 };
 const CHEN_LIFE_EVENTS=[
@@ -68,3 +68,5 @@ const baseEventChance=eventChance,basePreviewChance=previewChance,baseNationalSe
 eventChance=function(type){return isBlessedPlayer(p?.name)?95:baseEventChance(type)};
 previewChance=function(type){return isBlessedPlayer(p?.name)?95:basePreviewChance(type)};
 passesNationalSelection=function(level,profile){return isBlessedPlayer(p?.name)?{ok:true,score:999,chance:1,threshold:profile?.threshold||0}:baseNationalSelection(level,profile)};
+const baseInjuryRiskFactor=injuryRiskFactor;
+injuryRiskFactor=function(scope){return isBlessedPlayer(p?.name)?.12:baseInjuryRiskFactor(scope)};

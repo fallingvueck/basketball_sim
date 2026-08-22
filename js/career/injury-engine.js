@@ -230,6 +230,7 @@ function seasonBodyAssessment(){
  p.bodyVulnerability=v;p.bodyNote=note;return {v,note,cls};
 }
 function estimatedPlanRisk(plan){
+ if(typeof isBlessedPlayer==="function"&&isBlessedPlayer(p?.name))return 1;
  let recent=(p.injuryHistory||[]).filter(x=>p.year-(x.year||0)<=3).length;
  let oldCount=Object.values(p.oldInjuries||{}).reduce((a,b)=>a+Math.min(2,Number(b)||0),0);
  let base=4+(100-p.durability)*.08+(p.bodyLoad||0)*.14+(p.fatigue||0)*.04+recent*1.5+oldCount*.75+(p.age>=30?(p.age-29)*.65:0);
@@ -240,6 +241,7 @@ function estimatedPlanRisk(plan){
  return Math.max(floor,Math.min(52,Math.round(base)));
 }
 function seasonInjuryDecisionChance(){
+ if(typeof isBlessedPlayer==="function"&&isBlessedPlayer(p?.name))return 1;
  // Injury is decided once, at the health phase. Ordinary event outcomes may
  // change fatigue, ability, reputation and the season's accumulated load, but
  // no longer get an unrelated injury roll after every click.

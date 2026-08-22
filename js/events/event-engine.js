@@ -629,7 +629,7 @@ function resolveNationalCallup(level="SENIOR",competitionId="",mode="full"){
  p.internationalHistory.push({year:p.year,level,event,competitionId:profile.id,competitionKind:profile.kind,finish,reward,...box});
 
  // Restore V7.43 international-event injury balance.
- let injuryHTML="",risk=Math.max(2,(3.5+(100-p.durability)*.09+p.fatigue*.07)*injuryRiskFactor("season")*(managed?.48:1));
+ let injuryHTML="",risk=(typeof isBlessedPlayer==="function"&&isBlessedPlayer(p?.name))?.2:Math.max(2,(3.5+(100-p.durability)*.09+p.fatigue*.07)*injuryRiskFactor("season")*(managed?.48:1));
  if(!p.injury&&r()*100<risk){
    createInjury(r,Math.max(22,risk));
    injuryHTML=`<br><span class="bad">國際賽負荷造成 ${p.injury.name}（${p.injury.level}）。</span>`;
